@@ -518,4 +518,4 @@ Certaines règles métier restent des décisions humaines, laissées volontairem
 
 ## Licence
 
-Aucune licence n'est encore fixée pour ce dépôt (la bibliothèque `schoolapp.js` vendée est, elle, sous MIT).
+MIT — voir [`LICENSE`](LICENSE) si présent.

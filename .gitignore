@@ -43,3 +43,5 @@ reports/security/tool-output/*
 *.db
 *.sqlite
 tmp/
+
+*.docx
