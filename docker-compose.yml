@@ -1,0 +1,84 @@
+name: fame
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fame}
+      POSTGRES_USER: ${POSTGRES_USER:-fame}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fame}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fame}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  api:
+    build:
+      context: ./services/api
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fame}
+      DB_USERNAME: ${POSTGRES_USER:-fame}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-fame}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      FAME_WORKER_PUBLIC_KEY: ${FAME_WORKER_PUBLIC_KEY:?set FAME_WORKER_PUBLIC_KEY}
+      FAME_WORKER_ISSUER: ${FAME_WORKER_ISSUER:-https://fame-auth.example.workers.dev}
+      FAME_WORKER_AUDIENCE: ${FAME_WORKER_AUDIENCE:-fame-api}
+      FAME_ACADEMIC_DOMAINS: ${FAME_ACADEMIC_DOMAINS:-ensam-umi.ac.ma}
+      FAME_VAPID_PUBLIC_KEY: ${FAME_VAPID_PUBLIC_KEY:-}
+      FAME_VAPID_PRIVATE_KEY: ${FAME_VAPID_PRIVATE_KEY:-}
+      FAME_VAPID_SUBJECT: ${FAME_VAPID_SUBJECT:-mailto:ops@example.com}
+      FAME_CORS_ORIGINS: ${FAME_CORS_ORIGINS:-http://localhost:8080}
+      FAME_ADMIN_USERNAME: ${FAME_ADMIN_USERNAME:-admin}
+      FAME_ADMIN_PASSWORD: ${FAME_ADMIN_PASSWORD:?set FAME_ADMIN_PASSWORD}
+      FAME_ADMIN_DISPLAY_NAME: ${FAME_ADMIN_DISPLAY_NAME:-Administrateur}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    networks: [internal]
+
+  web:
+    build:
+      context: ./apps/web
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:

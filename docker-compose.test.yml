@@ -1,0 +1,41 @@
+name: fame-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fame
+      POSTGRES_USER: fame
+      POSTGRES_PASSWORD: fame
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fame"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api-test:
+    build:
+      context: ./services/api
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/fame
+      DB_USERNAME: fame
+      DB_PASSWORD: fame
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      FAME_WORKER_PUBLIC_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      FAME_WORKER_ISSUER: https://test.workers.dev
+      FAME_WORKER_AUDIENCE: fame-api
+      FAME_ADMIN_PASSWORD: admin-test-password
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
