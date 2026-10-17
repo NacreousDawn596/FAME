@@ -1,7 +1,7 @@
 /**
  * Parser for modules and elements HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Parse HTML content containing modules and their elements

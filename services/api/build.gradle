@@ -51,6 +51,7 @@ dependencies {
     implementation "nl.martijndwars:web-push:${webpushVersion}"
     implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.78.1'
+    implementation 'com.google.crypto.tink:tink:1.13.0'
 
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
 
@@ -62,7 +63,6 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
     testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
     testImplementation 'org.awaitility:awaitility:4.2.2'
-    testImplementation 'com.google.crypto.tink:tink:1.13.0'
 }
 
 tasks.named('test') {

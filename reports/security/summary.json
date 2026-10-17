@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-10-17T20:00:00Z",
+  "scope": "local test environment (Testcontainers, mocks, synthetic identities)",
+  "findings": [
+    {
+      "id": "FINDING-001",
+      "title": "CSRF token and content dumps logged (schoolapp.js)",
+      "severity": "MEDIUM",
+      "status": "FIXED",
+      "component": "schoolapp.js/src/auth.js"
+    },
+    {
+      "id": "FINDING-002",
+      "title": "Mixed CJS/ESM in schoolapp.js",
+      "severity": "MEDIUM",
+      "status": "FIXED",
+      "component": "schoolapp.js"
+    },
+    {
+      "id": "FINDING-003",
+      "title": "Open redirect following in HTTP client",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "component": "schoolapp.js/src/http_client.js"
+    },
+    {
+      "id": "FINDING-004",
+      "title": "react-router XSS / open redirect",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "component": "apps/web (react-router-dom)",
+      "references": ["GHSA-2w69-qvjg-hvjx", "GHSA-2j2x-hqr9-3h42"]
+    },
+    {
+      "id": "FINDING-005",
+      "title": "Vulnerable runtime dependency cheerio-without-node-native",
+      "severity": "CRITICAL",
+      "status": "FIXED",
+      "component": "workers/schoolapp-auth"
+    },
+    {
+      "id": "FINDING-006",
+      "title": "Dev-only tooling vulnerabilities (tinypool, esbuild, @vitest/mocker)",
+      "severity": "CRITICAL",
+      "status": "OPEN",
+      "component": "apps/web + workers/schoolapp-auth (devDependencies only)",
+      "note": "Not shipped in production bundle; remediate by upgrading vitest/vite (breaking)."
+    }
+  ],
+  "dependencyScans": {
+    "web": { "productionVulnerabilities": 0, "devOnlyVulnerabilities": 8 },
+    "worker": { "productionVulnerabilities": 0, "devOnlyVulnerabilities": 12 },
+    "backendOwaspDependencyCheck": "running"
+  },
+  "notPerformed": [
+    "DAST (OWASP ZAP)",
+    "Container image scan (Trivy)",
+    "500-student load test execution (playbook provided)",
+    "Manual review of real SchoolApp flow (requires authorized test accounts)",
+    "Legal compliance review (CNDP Law 09-08 / GDPR)"
+  ]
+}

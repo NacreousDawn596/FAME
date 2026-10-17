@@ -1,7 +1,7 @@
 /**
  * Parser for academic programs (filieres) HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Parse HTML content containing a table of academic programs and return structured data

@@ -1,7 +1,7 @@
 /**
  * Parser for user profile HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Parse HTML content containing user profile and return detailed user data

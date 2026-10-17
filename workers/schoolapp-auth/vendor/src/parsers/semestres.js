@@ -1,7 +1,7 @@
 /**
  * Parser for semester academic results HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Parse HTML content containing semester averages

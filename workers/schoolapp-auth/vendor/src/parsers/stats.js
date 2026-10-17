@@ -1,7 +1,7 @@
 /**
  * Parser for statistics HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Extract statistics from modal/popup HTML content

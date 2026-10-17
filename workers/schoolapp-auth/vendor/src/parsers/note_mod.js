@@ -1,7 +1,7 @@
 /**
  * Parser for module grades HTML content
  */
-const cheerio = require('cheerio-without-node-native');
+const cheerio = require('cheerio');
 
 /**
  * Parse HTML content containing module grades
