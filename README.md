@@ -9,6 +9,7 @@ FAME numérise l'organisation des événements de recrutement et des entretiens 
 - **File d'attente FIFO** autoritaire côté serveur, avec verrouillage transactionnel (`FOR UPDATE SKIP LOCKED`) contre les doubles affectations.
 - **Tableau de bord régulateur** temps réel (SSE + Redis Pub/Sub) avec plan 2D de la salle, appel, dispatching, absences, pauses.
 - **Expérience étudiant** mobile-first avec notifications Web Push (VAPID) et repli in-app.
+- **Centre de contrôle superadmin** (`/admin`) : aperçu opérationnel, gestion des utilisateurs, journal d'audit append-only, centre de notifications (composeur + ciblage + modèles + suivi de livraison), configuration, santé système, gestion des données et révocation de sessions. Voir [`docs/superadmin.md`](docs/superadmin.md).
 - **Analyses et exports** (CSV/JSON) post-événement.
 
 ## Architecture
