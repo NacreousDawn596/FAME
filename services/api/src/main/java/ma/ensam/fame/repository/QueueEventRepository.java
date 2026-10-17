@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface QueueEventRepository extends JpaRepository<QueueEvent, UUID> {
     List<QueueEvent> findByCampaignIdOrderByOccurredAtDesc(UUID campaignId, Pageable pageable);
     List<QueueEvent> findByCampaignIdAndEntityIdOrderByOccurredAtAsc(UUID campaignId, String entityId);
+    List<QueueEvent> findTop200ByOrderByOccurredAtDesc();
+    List<QueueEvent> findByCampaignIdAndActionOrderByOccurredAtDesc(UUID campaignId, String action, Pageable pageable);
 }

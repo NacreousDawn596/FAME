@@ -10,5 +10,6 @@ import java.util.UUID;
 public interface StationRepository extends JpaRepository<Station, UUID> {
     List<Station> findByCampaignIdOrderByLabel(UUID campaignId);
     List<Station> findByCampaignIdAndStatus(UUID campaignId, StationStatus status);
+    long countByStatus(StationStatus status);
     void deleteByCampaignId(UUID campaignId);
 }

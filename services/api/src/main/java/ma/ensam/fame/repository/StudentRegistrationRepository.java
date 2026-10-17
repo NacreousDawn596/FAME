@@ -51,6 +51,25 @@ public interface StudentRegistrationRepository extends JpaRepository<StudentRegi
 
     long countByCampaignId(UUID campaignId);
 
+    long countByStatusIn(List<QueueStatus> statuses);
+
+    @Query("""
+            select r from StudentRegistration r
+            where (:q is null or lower(r.fullName) like lower(concat('%', :q, '%'))
+                   or lower(r.studentCode) like lower(concat('%', :q, '%'))
+                   or lower(r.email) like lower(concat('%', :q, '%')))
+              and (:campaignId is null or r.campaign.id = :campaignId)
+              and (:status is null or r.status = :status)
+              and (:filiere is null or lower(r.filiere) = lower(:filiere))
+            order by r.sequenceNo asc
+            """)
+    List<StudentRegistration> search(
+            @Param("q") String q,
+            @Param("campaignId") UUID campaignId,
+            @Param("status") QueueStatus status,
+            @Param("filiere") String filiere,
+            org.springframework.data.domain.Pageable pageable);
+
     /** Atomic FIFO claim: locks the earliest eligible matching row, skipping already-locked rows. */
     @Query(value = """
             select * from student_registration

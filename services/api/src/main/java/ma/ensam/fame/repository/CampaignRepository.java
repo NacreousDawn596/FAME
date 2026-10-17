@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface CampaignRepository extends JpaRepository<Campaign, UUID> {
     List<Campaign> findByStatusInOrderByCreatedAtDesc(List<CampaignStatus> statuses);
+    long countByStatus(CampaignStatus status);
+    List<Campaign> findByStatusOrderByCreatedAtDesc(CampaignStatus status);
 }

@@ -1,5 +1,6 @@
 package ma.ensam.fame.security;
 
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -17,7 +18,14 @@ public record StudentPrincipal(
         String studentCode,
         String fullName,
         String email
-) implements Serializable {
+) implements Serializable, AuthenticatedPrincipal {
+
+    /** Clean principal name used by the session index (for revocation). */
+    @Override
+    public String getName() {
+        return "student:" + registrationId;
+    }
+
     public Collection<GrantedAuthority> authorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_STUDENT"));
     }
