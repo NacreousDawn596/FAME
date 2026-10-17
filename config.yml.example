@@ -43,7 +43,7 @@ fame:
     # key (SIGNING_PRIVATE_KEY secret). Get it from `GET /public-key` on the
     # deployed Worker.
     public-key: change-me-ed25519-public-key
-    issuer: https://fame-auth.example.workers.dev
+    issuer: https://schoolapp-auth.gadzarts.xyz
     audience: fame-api
     assertion-ttl: 90s
   academic:

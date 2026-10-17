@@ -79,7 +79,7 @@ fame:
     email: ${FAME_ADMIN_EMAIL:}
   worker:
     public-key: ${FAME_WORKER_PUBLIC_KEY:}
-    issuer: ${FAME_WORKER_ISSUER:https://fame-auth.example.workers.dev}
+    issuer: ${FAME_WORKER_ISSUER:https://schoolapp-auth.gadzarts.xyz}
     audience: ${FAME_WORKER_AUDIENCE:fame-api}
     assertion-ttl: 90s
   academic:

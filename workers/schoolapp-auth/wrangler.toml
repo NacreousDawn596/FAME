@@ -1,15 +1,19 @@
 # FAME SchoolApp authentication worker
+# Public URL: https://schoolapp-auth.gadzarts.xyz (custom domain — configure the
+# route/zone in the Cloudflare dashboard or via `routes`).
 name = "fame-schoolapp-auth"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
-# The only secrets required. Never commit these values.
+# The only secret required. Never commit this value.
 #   npx wrangler secret put SIGNING_PRIVATE_KEY
-# SIGNING_PRIVATE_KEY: base64url-encoded Ed25519 32-byte seed (generated below).
+# SIGNING_PRIVATE_KEY: base64url-encoded Ed25519 32-byte seed.
 #
 # Public key is derived from the private key; expose it with `GET /public-key`.
 
 [vars]
+# The `iss` claim embedded in assertions; must match the backend `fame.worker.issuer`.
+ISSUER = "https://schoolapp-auth.gadzarts.xyz"
 # Fixed, allowlisted upstream SchoolApp origin (no arbitrary hosts allowed).
 SCHOOLAPP_BASE_URL = "https://schoolapp.ensam-umi.ac.ma"
 # Comma-separated allowlisted CORS origins.

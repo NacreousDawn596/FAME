@@ -1,7 +1,7 @@
 import { SchoolAppClient } from '../vendor/index.js';
 import { derivePublicKey, signAssertion } from './jwt.js';
 
-const ISSUER = 'https://fame-auth.example.workers.dev';
+const DEFAULT_ISSUER = 'https://schoolapp-auth.gadzarts.xyz';
 const AUDIENCE = 'fame-api';
 const ASSERTION_TTL_SECONDS = 90;
 const MAX_BODY_BYTES = 8192;
@@ -118,7 +118,7 @@ async function handleLogin(request, env) {
 
   const now = Math.floor(Date.now() / 1000);
   const claims = {
-    iss: ISSUER,
+    iss: env.ISSUER || DEFAULT_ISSUER,
     aud: AUDIENCE,
     sub: identity.studentCode,
     email: identity.email,
