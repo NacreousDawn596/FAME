@@ -56,7 +56,7 @@ export interface StaffMe {
   id: string;
   username: string;
   displayName: string;
-  role: 'ADMIN' | 'ORGANIZER';
+  role: 'SUPERADMIN' | 'ADMIN' | 'ORGANIZER';
 }
 
 export interface StudentMe {
@@ -78,4 +78,92 @@ export interface RealtimeEvent {
   type: string;
   campaignId: string;
   data: Record<string, unknown>;
+}
+
+/* ---------------- Superadmin control center ---------------- */
+
+export interface OverviewData {
+  campaigns: Record<string, number>;
+  students: Record<string, number>;
+  stations: Record<string, number>;
+  staffUsers: number;
+  recentActions: AuditEvent[];
+  recentBroadcasts: BroadcastSummary[];
+}
+
+export interface AuditEvent {
+  id: string;
+  campaignId: string;
+  entityType: string;
+  entityId: string;
+  actorId: string;
+  actorRole: string;
+  action: string;
+  metadata: string;
+  occurredAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  displayName: string;
+  role: string;
+  enabled: boolean;
+  createdAt: string;
+}
+
+export interface AppSettingView {
+  key: string;
+  value: string;
+  description: string;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  title: string;
+  body: string;
+  type: string;
+  route: string;
+  active: boolean;
+}
+
+export interface BroadcastSummary {
+  id: string;
+  campaignId: string;
+  segment: string;
+  title: string;
+  body: string;
+  type: string;
+  route: string;
+  channel: string;
+  status: string;
+  targetCount: number;
+  deliveredCount: number;
+  failedCount: number;
+  createdAt: string;
+  sentAt: string;
+}
+
+export interface SafeConfig {
+  academicDomains: string;
+  corsOrigins: string;
+  workerIssuer: string;
+  workerAudience: string;
+  workerAssertionTtl: string;
+  vapidPublicKey: string | null;
+  vapidConfigured: boolean;
+  bootstrapAdminUsername: string;
+  superAdminConfigured: boolean;
+}
+
+export interface HealthStatus {
+  application: string;
+  database: { status: string };
+  redis: { status: string };
+  vapidConfigured: boolean;
+  superAdminConfigured: boolean;
+  pendingPushDeliveries: number;
 }

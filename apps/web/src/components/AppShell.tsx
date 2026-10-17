@@ -20,6 +20,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   const isAdmin = me?.kind === 'staff' && me.role === 'ADMIN';
+  const isSuperAdmin = me?.kind === 'staff' && me.role === 'SUPERADMIN';
 
   return (
     <div className="app-shell">
@@ -29,7 +30,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           {t('appName')}
         </div>
         <nav className="row" style={{ gap: 18 }}>
-          {isAdmin && <Link to="/admin">{t('campaigns')}</Link>}
+          {isSuperAdmin && <Link to="/admin">Control Center</Link>}
+          {isAdmin && <Link to="/campaigns">{t('campaigns')}</Link>}
           {me?.kind === 'staff' && <Link to="/dashboard">{t('dashboard')}</Link>}
           {!online && <span className="badge badge-orange">{t('offline')}</span>}
           <span className="muted small">{me?.kind === 'staff' ? me.displayName : ''}</span>

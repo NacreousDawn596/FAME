@@ -74,7 +74,7 @@ export default function RegulatorDashboardPage() {
     return (
       <div className="empty">
         <p>{t('empty')}</p>
-        <Link className="btn btn-primary mt16" to="/admin">{t('campaigns')}</Link>
+        <Link className="btn btn-primary mt16" to="/campaigns">{t('campaigns')}</Link>
       </div>
     );
   }
