@@ -1,4 +1,4 @@
-# FAME — Forum des Entreprises
+# FAME — Forum Art & Métiers Entreprises
 
 FAME numérise l'organisation des événements de recrutement et des entretiens de fin d'études (PFE) au Maroc. Il remplace les fichiers d'inscription manuels, les files d'attente coordonnées à la main et la synchronisation informelle entre organisateurs.
 

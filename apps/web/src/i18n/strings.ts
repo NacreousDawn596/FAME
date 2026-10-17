@@ -2,7 +2,7 @@ export type Locale = 'fr' | 'en';
 
 const fr = {
   appName: 'FAME',
-  appTagline: 'Forum des Entreprises',
+  appTagline: 'Forum Art & Métiers Entreprises',
   login: 'Connexion',
   username: "Nom d'utilisateur",
   password: 'Mot de passe',
@@ -79,7 +79,7 @@ const fr = {
 
 const en: Record<keyof typeof fr, string> = {
   appName: 'FAME',
-  appTagline: 'Company Forum',
+  appTagline: 'Art & Métiers Companies Forum',
   login: 'Sign in',
   username: 'Username',
   password: 'Password',

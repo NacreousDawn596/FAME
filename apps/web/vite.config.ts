@@ -13,7 +13,7 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['icons/favicon.svg'],
       manifest: {
-        name: 'FAME — Forum des Entreprises',
+        name: 'FAME — Forum Art & Métiers Entreprises',
         short_name: 'FAME',
         description: 'Organisation des événements de recrutement et entretiens PFE',
         theme_color: '#0a2540',
