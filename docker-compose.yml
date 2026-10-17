@@ -31,6 +31,9 @@ services:
   api:
     build:
       context: ./services/api
+    # Backend is configured exclusively via config.yml (mounted below).
+    # Copy config.yml.example -> config.yml and adjust. Infra topology
+    # (DB/Redis host) is overridden here for the compose network.
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fame}
       DB_USERNAME: ${POSTGRES_USER:-fame}
@@ -38,17 +41,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      FAME_WORKER_PUBLIC_KEY: ${FAME_WORKER_PUBLIC_KEY:?set FAME_WORKER_PUBLIC_KEY}
-      FAME_WORKER_ISSUER: ${FAME_WORKER_ISSUER:-https://fame-auth.example.workers.dev}
-      FAME_WORKER_AUDIENCE: ${FAME_WORKER_AUDIENCE:-fame-api}
-      FAME_ACADEMIC_DOMAINS: ${FAME_ACADEMIC_DOMAINS:-ensam-umi.ac.ma}
-      FAME_VAPID_PUBLIC_KEY: ${FAME_VAPID_PUBLIC_KEY:-}
-      FAME_VAPID_PRIVATE_KEY: ${FAME_VAPID_PRIVATE_KEY:-}
-      FAME_VAPID_SUBJECT: ${FAME_VAPID_SUBJECT:-mailto:ops@example.com}
-      FAME_CORS_ORIGINS: ${FAME_CORS_ORIGINS:-http://localhost:8080}
-      FAME_ADMIN_USERNAME: ${FAME_ADMIN_USERNAME:-admin}
-      FAME_ADMIN_PASSWORD: ${FAME_ADMIN_PASSWORD:?set FAME_ADMIN_PASSWORD}
-      FAME_ADMIN_DISPLAY_NAME: ${FAME_ADMIN_DISPLAY_NAME:-Administrateur}
+    volumes:
+      - ./config.yml:/app/config.yml:ro
     depends_on:
       postgres:
         condition: service_healthy

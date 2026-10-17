@@ -4,7 +4,7 @@ import ma.ensam.fame.common.ApiException;
 import ma.ensam.fame.domain.Campaign;
 import ma.ensam.fame.domain.Recruiter;
 import ma.ensam.fame.domain.Station;
-import ma.ensam.fame.domain.StationStatus;
+import ma.ensam.fame.factory.StationFactory;
 import ma.ensam.fame.realtime.RealtimeService;
 import ma.ensam.fame.repository.RecruiterRepository;
 import ma.ensam.fame.repository.StationRepository;
@@ -24,32 +24,29 @@ public class StationService {
     private final CampaignAccessService accessService;
     private final AuditService audit;
     private final RealtimeService realtime;
+    private final StationFactory stationFactory;
 
     public StationService(StationRepository stationRepository,
                           RecruiterRepository recruiterRepository,
                           CampaignAccessService accessService,
                           AuditService audit,
-                          RealtimeService realtime) {
+                          RealtimeService realtime,
+                          StationFactory stationFactory) {
         this.stationRepository = stationRepository;
         this.recruiterRepository = recruiterRepository;
         this.accessService = accessService;
         this.audit = audit;
         this.realtime = realtime;
+        this.stationFactory = stationFactory;
     }
 
     @Transactional
     public Station create(UUID campaignId, StationRequest req, FameUserPrincipal user) {
         Campaign campaign = accessService.requireCampaignAccess(campaignId, user);
-        Station station = new Station();
-        station.setCampaign(campaign);
-        station.setLabel(req.label());
-        station.setLocationLabel(req.locationLabel());
-        station.setFiliere(req.filiere());
-        station.setPosX(req.posX() == null ? 0 : req.posX());
-        station.setPosY(req.posY() == null ? 0 : req.posY());
-        if (req.recruiterId() != null) {
-            station.setRecruiter(recruiter(req.recruiterId()));
-        }
+        Recruiter recruiter = req.recruiterId() == null ? null : recruiter(req.recruiterId());
+        Station station = stationFactory.create(new StationFactory.Context(
+                campaign, req.label(), req.locationLabel(), req.filiere(), recruiter,
+                req.posX(), req.posY()));
         station = stationRepository.save(station);
         audit.record(campaignId, "STATION", station.getId().toString(), "CREATED", Map.of());
         realtime.publishToCampaign(campaignId, "STATION_UPDATED", Map.of("stationId", station.getId().toString()));

@@ -1,0 +1,60 @@
+# ===========================================================================
+# FAME — Backend configuration
+# ---------------------------------------------------------------------------
+# Copy this file to `config.yml` and fill in the values. The real `config.yml`
+# is git-ignored and never committed. It is loaded by Spring Boot via
+# `spring.config.import: optional:file:./config.yml` and OVERRIDES the defaults
+# in `services/api/src/main/resources/application.yml`.
+#
+# In Docker, this file is mounted read-only at /app/config.yml.
+# ===========================================================================
+
+spring:
+  datasource:
+    # PostgreSQL — internal network only, never exposed publicly.
+    url: jdbc:postgresql://localhost:5432/fame
+    username: fame
+    password: change-me-db-password
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 10000
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # Leave empty if Redis has no password.
+      password: ""
+
+server:
+  servlet:
+    session:
+      cookie:
+        # Set to true behind HTTPS (production).
+        secure: false
+
+fame:
+  worker:
+    # Public key (Ed25519, base64url) matching the Cloudflare Worker's private
+    # key (SIGNING_PRIVATE_KEY secret). Get it from `GET /public-key` on the
+    # deployed Worker.
+    public-key: change-me-ed25519-public-key
+    issuer: https://fame-auth.example.workers.dev
+    audience: fame-api
+    assertion-ttl: 90s
+  academic:
+    # Comma-separated list of authorized academic email domains.
+    domains: ensam-umi.ac.ma
+  vapid:
+    # Web Push keys. Generate: npx web-push generate-vapid-keys
+    public-key: change-me-vapid-public-key
+    private-key: change-me-vapid-private-key
+    subject: "mailto:ops@example.com"
+  cors:
+    # Comma-separated allowed origins.
+    origins: http://localhost:8080
+  bootstrap:
+    # Bootstrap administrator, created on first startup. Change after login.
+    admin-username: admin
+    admin-password: change-me-admin-password
+    admin-display-name: Administrateur

@@ -1,14 +1,14 @@
 spring:
   application:
     name: fame-api
+  # External operator configuration. `optional:` lets the app boot without it
+  # (tests / local dev); when present it overrides the defaults below.
+  config:
+    import: optional:file:./config.yml
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/fame}
     username: ${DB_USERNAME:fame}
     password: ${DB_PASSWORD:fame}
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 2
-      connection-timeout: 10000
   jpa:
     hibernate:
       ddl-auto: validate
@@ -70,6 +70,8 @@ management:
     redis:
       enabled: true
 
+# Defaults (overridden by config.yml when present). Env-var fallbacks keep the
+# app bootable in tests and local development.
 fame:
   worker:
     public-key: ${FAME_WORKER_PUBLIC_KEY:}

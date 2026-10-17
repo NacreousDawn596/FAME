@@ -1,33 +1,40 @@
 # Déploiement
 
-## Variables d'environnement requises
+## Configuration
 
-Toutes les valeurs sont fournies via `.env` (jamais commité). Copier `.env.example` et renseigner.
+Le backend est configuré **uniquement** via `config.yml` (voir `config.yml.example`). Le frontend via `apps/web/.env` (voir `apps/web/.env.example`).
+
+### Variables d'environnement requises
 
 | Variable | Où | Description |
 |----------|----|-------------|
-| `POSTGRES_DB/USER/PASSWORD` | Compose | Base de données (réseau interne uniquement). |
-| `REDIS_PASSWORD` | Compose | Redis (interne uniquement). |
-| `FAME_WORKER_PUBLIC_KEY` | API | Clé publique Ed25519 du Worker (base64url). |
-| `FAME_WORKER_ISSUER` | API | URL du Worker émetteur d'assertions. |
-| `FAME_WORKER_AUDIENCE` | API | Audience attendue (`fame-api`). |
-| `FAME_ACADEMIC_DOMAINS` | API | Domaines email académiques autorisés (ex. `ensam-umi.ac.ma`). |
-| `FAME_VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT` | API | Clés Web Push (VAPID). |
-| `FAME_ADMIN_USERNAME/PASSWORD/DISPLAY_NAME` | API | Compte bootstrap (créé au 1er démarrage). |
-| `FAME_CORS_ORIGINS` | API | Origines autorisées (CORS). |
-| `VITE_WORKER_URL` | Build web | URL du Worker (build-time, non secret). |
-| `WEB_PORT` | Compose | Port d'exposition du proxy web (défaut 8080). |
+| `POSTGRES_DB/USER/PASSWORD` | `.env` (Compose) | Base de données (réseau interne uniquement). |
+| `REDIS_PASSWORD` | `.env` (Compose) | Redis (interne uniquement). |
+| `VITE_WORKER_URL` | `apps/web/.env` | URL du Worker (build-time, non secret). |
+
+### Clés de configuration backend (`config.yml`)
+
+| Clé | Description |
+|-----|-------------|
+| `fame.worker.public-key` | Clé publique Ed25519 du Worker (base64url). |
+| `fame.worker.issuer/audience` | URL du Worker émetteur + audience (`fame-api`). |
+| `fame.academic.domains` | Domaines email académiques autorisés. |
+| `fame.vapid.public-key/private-key/subject` | Clés Web Push (VAPID). |
+| `fame.bootstrap.admin-*` | Compte bootstrap (créé au 1er démarrage). |
+| `fame.cors.origins` | Origines autorisées (CORS). |
+| `spring.datasource.*` / `spring.data.redis.*` | Connexions (en Docker, hôte = `postgres`/`redis`). |
 
 ## Docker Compose (self-hosted)
 
 ```bash
 cp .env.example .env
-# éditer .env
+cp config.yml.example config.yml
+# éditer .env (infra) et config.yml (application)
 docker compose up -d --build
 docker compose ps            # vérifier les healthchecks
 ```
 
-PostgreSQL et Redis restent sur le réseau interne (`internal`) — aucun port exposé publiquement. Seul le proxy web est exposé.
+PostgreSQL et Redis restent sur le réseau interne (`internal`) — aucun port exposé publiquement. Seul le proxy web est exposé. `config.yml` est monté en lecture seule dans `/app/config.yml`.
 
 ## Backups / restauration
 
@@ -40,7 +47,7 @@ Voir [`backup-restore.md`](backup-restore.md).
 
 ## HTTPS de production
 
-Le reverse proxy Nginx fourni sert HTTP ; en production, terminer TLS en amont (Cloudflare / load balancer / `certbot`) et transmettre `X-Forwarded-Proto`. Activer alors `FAME_COOKIE_SECURE=true` et `FAME_CORS_ORIGINS=https://<domaine>`.
+Le reverse proxy Nginx fourni sert HTTP ; en production, terminer TLS en amont (Cloudflare / load balancer / `certbot`) et transmettre `X-Forwarded-Proto`. Activer alors `server.servlet.session.cookie.secure: true` et `fame.cors.origins=https://<domaine>` dans `config.yml`.
 
 ## Cloudflare Worker
 
@@ -53,7 +60,7 @@ npx wrangler deploy
 curl https://<worker>.workers.dev/public-key
 ```
 
-Configurer ensuite `FAME_WORKER_PUBLIC_KEY` et `FAME_WORKER_ISSUER` côté API.
+Configurer ensuite `fame.worker.public-key` et `fame.worker.issuer` dans `config.yml`.
 
 Génération de la paire de clés Ed25519 :
 

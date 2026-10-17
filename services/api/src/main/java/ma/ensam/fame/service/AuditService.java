@@ -1,7 +1,7 @@
 package ma.ensam.fame.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.ensam.fame.domain.QueueEvent;
+import ma.ensam.fame.factory.AuditEventFactory;
 import ma.ensam.fame.repository.QueueEventRepository;
 import ma.ensam.fame.security.CurrentUser;
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import java.util.UUID;
 /**
  * Writes sanitized audit events. Never records credentials, tokens or personal
  * data beyond the minimal actor/entity identifiers required for auditability.
+ * Event construction is delegated to {@link AuditEventFactory}.
  */
 @Service
 public class AuditService {
@@ -21,24 +22,18 @@ public class AuditService {
     private static final Logger log = LoggerFactory.getLogger(AuditService.class);
 
     private final QueueEventRepository repository;
-    private final ObjectMapper objectMapper;
+    private final AuditEventFactory eventFactory;
 
-    public AuditService(QueueEventRepository repository, ObjectMapper objectMapper) {
+    public AuditService(QueueEventRepository repository, AuditEventFactory eventFactory) {
         this.repository = repository;
-        this.objectMapper = objectMapper;
+        this.eventFactory = eventFactory;
     }
 
     public void record(UUID campaignId, String entityType, String entityId,
                        String action, Map<String, Object> metadata) {
         try {
-            QueueEvent event = new QueueEvent();
-            event.setCampaignId(campaignId);
-            event.setEntityType(entityType);
-            event.setEntityId(entityId);
-            event.setActorId(actorId());
-            event.setActorRole(actorRole());
-            event.setAction(action);
-            event.setMetadata(metadata == null ? null : objectMapper.writeValueAsString(metadata));
+            QueueEvent event = eventFactory.create(
+                    campaignId, entityType, entityId, actorId(), actorRole(), action, metadata);
             repository.save(event);
         } catch (Exception e) {
             log.error("Failed to record audit event", e);

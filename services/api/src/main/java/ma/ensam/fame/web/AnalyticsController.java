@@ -3,7 +3,6 @@ package ma.ensam.fame.web;
 import ma.ensam.fame.security.CurrentUser;
 import ma.ensam.fame.service.AnalyticsService;
 import ma.ensam.fame.service.ExportService;
-import ma.ensam.fame.domain.QueueEvent;
 import ma.ensam.fame.repository.QueueEventRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;

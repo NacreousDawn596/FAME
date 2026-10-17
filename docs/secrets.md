@@ -12,10 +12,13 @@
 | Secret | Emplacement |
 |--------|-------------|
 | `SIGNING_PRIVATE_KEY` (Ed25519) | Secret Cloudflare Worker (`wrangler secret`) |
-| `FAME_WORKER_PUBLIC_KEY` | Variable API (clé publique — non secrète mais config requise) |
-| `FAME_VAPID_PRIVATE_KEY` | Secret plateforme (Compose secrets / gestionnaire de secrets) |
-| `POSTGRES_PASSWORD`, `REDIS_PASSWORD` | Secrets plateforme |
-| `FAME_ADMIN_PASSWORD` | Variable d'env (bootstrap) — à changer après premier login |
+| `fame.worker.public-key` | `config.yml` (clé publique — non secrète mais config requise) |
+| `fame.vapid.private-key` | `config.yml` (secret plateforme) |
+| `spring.datasource.password`, `spring.data.redis.password` | `config.yml` |
+| `fame.bootstrap.admin-password` | `config.yml` (bootstrap) — à changer après premier login |
+| `POSTGRES_PASSWORD`, `REDIS_PASSWORD` | `.env` (Compose, infra) |
+
+> `config.yml` et `.env` sont git-ignorés ; seuls les templates `*.example` sont commités.
 
 ## Rotation
 

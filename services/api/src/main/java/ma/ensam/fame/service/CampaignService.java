@@ -2,6 +2,7 @@ package ma.ensam.fame.service;
 
 import ma.ensam.fame.common.ApiException;
 import ma.ensam.fame.domain.*;
+import ma.ensam.fame.factory.CampaignFactory;
 import ma.ensam.fame.repository.*;
 import ma.ensam.fame.security.FameUserPrincipal;
 import ma.ensam.fame.realtime.RealtimeService;
@@ -23,6 +24,7 @@ public class CampaignService {
     private final CampaignAccessService accessService;
     private final AuditService audit;
     private final RealtimeService realtime;
+    private final CampaignFactory campaignFactory;
 
     public CampaignService(CampaignRepository campaignRepository,
                            CompanyRepository companyRepository,
@@ -30,7 +32,8 @@ public class CampaignService {
                            AppUserRepository userRepository,
                            CampaignAccessService accessService,
                            AuditService audit,
-                           RealtimeService realtime) {
+                           RealtimeService realtime,
+                           CampaignFactory campaignFactory) {
         this.campaignRepository = campaignRepository;
         this.companyRepository = companyRepository;
         this.memberRepository = memberRepository;
@@ -38,6 +41,7 @@ public class CampaignService {
         this.accessService = accessService;
         this.audit = audit;
         this.realtime = realtime;
+        this.campaignFactory = campaignFactory;
     }
 
     @Transactional
@@ -45,15 +49,10 @@ public class CampaignService {
         Company company = companyRepository.findById(req.companyId())
                 .orElseThrow(() -> ApiException.notFound("COMPANY_NOT_FOUND", "Company not found"));
 
-        Campaign campaign = new Campaign();
-        campaign.setName(req.name());
-        campaign.setCompany(company);
-        campaign.setOwner(userRepository.findById(owner.id()).orElseThrow());
-        campaign.setDescription(req.description());
-        campaign.setLocation(req.location());
-        campaign.setStartsAt(req.startsAt());
-        campaign.setEndsAt(req.endsAt());
-        campaign.setStatus(CampaignStatus.DRAFT);
+        AppUser ownerUser = userRepository.findById(owner.id()).orElseThrow();
+        Campaign campaign = campaignFactory.create(new CampaignFactory.Context(
+                company, ownerUser, req.name(), req.description(), req.location(),
+                req.startsAt(), req.endsAt()));
         campaign = campaignRepository.save(campaign);
 
         // Owner becomes a member automatically.

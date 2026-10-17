@@ -27,12 +27,16 @@ Voir [`docs/architecture.md`](docs/architecture.md) et [`docs/auth-trust-boundar
 ## Démarrage rapide (Docker)
 
 ```bash
-cp .env.example .env          # puis renseignez les secrets
+cp .env.example .env              # variables infra (Postgres/Redis)
+cp config.yml.example config.yml  # configuration backend
+# puis renseignez les secrets dans config.yml
 docker compose up --build
 ```
 
 - Frontend : http://localhost:8080
 - API / Swagger : http://localhost:8080/api/v1/docs
+
+Configuration : le backend est configuré via `config.yml` (voir `config.yml.example`) ; le frontend via `apps/web/.env` (voir `apps/web/.env.example`).
 
 ## Tests
 
@@ -51,12 +55,13 @@ cd apps/web && npm test && npm run build
 
 ```
 apps/web/              Frontend React + PWA
-services/api/          Backend Spring Boot
+services/api/          Backend Spring Boot (factory pattern dans services/api/src/main/java/ma/ensam/fame/factory)
 workers/schoolapp-auth Cloudflare Worker (auth SchoolApp)
 infra/                 Docker, proxy Nginx, scripts
 tests/                 e2e / sécurité / charge (playbooks)
 reports/               Rapports sécurité & performance
 docs/                  Documentation
+config.yml.example     Configuration backend (template)
 ```
 
 ## Sécurité

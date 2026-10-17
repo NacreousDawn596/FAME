@@ -2,6 +2,7 @@ package ma.ensam.fame.service;
 
 import ma.ensam.fame.common.ApiException;
 import ma.ensam.fame.domain.*;
+import ma.ensam.fame.factory.StudentRegistrationFactory;
 import ma.ensam.fame.realtime.RealtimeService;
 import ma.ensam.fame.repository.StationRepository;
 import ma.ensam.fame.repository.StudentRegistrationRepository;
@@ -32,6 +33,7 @@ public class QueueEngine {
     private final RealtimeService realtime;
     private final AuditService audit;
     private final NotificationService notifications;
+    private final StudentRegistrationFactory registrationFactory;
 
     public QueueEngine(StudentRegistrationRepository registrationRepository,
                        StationRepository stationRepository,
@@ -39,7 +41,8 @@ public class QueueEngine {
                        SequenceAllocator sequenceAllocator,
                        RealtimeService realtime,
                        AuditService audit,
-                       NotificationService notifications) {
+                       NotificationService notifications,
+                       StudentRegistrationFactory registrationFactory) {
         this.registrationRepository = registrationRepository;
         this.stationRepository = stationRepository;
         this.stateMachine = stateMachine;
@@ -47,6 +50,7 @@ public class QueueEngine {
         this.realtime = realtime;
         this.audit = audit;
         this.notifications = notifications;
+        this.registrationFactory = registrationFactory;
     }
 
     /* ------------------------------------------------------------------ */
@@ -62,17 +66,10 @@ public class QueueEngine {
                     .orElseThrow();
         }
 
-        StudentRegistration reg = new StudentRegistration();
-        reg.setCampaign(campaign);
-        reg.setStudentCode(code);
-        reg.setEmail(email);
-        reg.setFullName(fullName);
-        reg.setFiliere(filiere);
-        reg.setSequenceNo(sequenceAllocator.next());
-        reg.setArrivalAt(Instant.now());
-        reg.setStatus(QueueStatus.WAITING);
-        reg.setRecoveryAccount(recovery);
-        reg.setRegisteredAt(Instant.now());
+        Instant arrivalAt = Instant.now();
+        StudentRegistration reg = registrationFactory.create(new StudentRegistrationFactory.Context(
+                campaign, code, email, fullName, filiere, recovery,
+                sequenceAllocator.next(), arrivalAt));
         reg = registrationRepository.save(reg);
 
         audit.record(campaign.getId(), "REGISTRATION", reg.getId().toString(), "REGISTERED",

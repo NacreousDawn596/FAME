@@ -1,4 +1,8 @@
-const BASE = '/api/v1';
+// Base API URL: same-origin reverse proxy by default; set VITE_API_BASE_URL to
+// target the API directly (e.g. cross-origin deployments).
+const BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
+  ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')}/api/v1`
+  : '/api/v1';
 
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;

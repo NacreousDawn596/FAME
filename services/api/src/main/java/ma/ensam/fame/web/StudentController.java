@@ -2,7 +2,6 @@ package ma.ensam.fame.web;
 
 import ma.ensam.fame.common.ApiException;
 import ma.ensam.fame.domain.Campaign;
-import ma.ensam.fame.domain.CampaignStatus;
 import ma.ensam.fame.domain.StudentRegistration;
 import ma.ensam.fame.repository.StudentRegistrationRepository;
 import ma.ensam.fame.security.CurrentUser;
@@ -12,7 +11,6 @@ import ma.ensam.fame.service.QueueEngine;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/student")
