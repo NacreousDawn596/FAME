@@ -21,7 +21,7 @@ public class StudentRegistration {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "campaign_id", nullable = false)
     private Campaign campaign;
 
@@ -50,7 +50,7 @@ public class StudentRegistration {
     @Column(nullable = false, length = 20)
     private QueueStatus status = QueueStatus.WAITING;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "station_id")
     private Station station;
 

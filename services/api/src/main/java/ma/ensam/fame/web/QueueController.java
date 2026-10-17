@@ -2,6 +2,7 @@ package ma.ensam.fame.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import ma.ensam.fame.domain.Campaign;
 import ma.ensam.fame.domain.StudentRegistration;
 import ma.ensam.fame.security.CurrentUser;
@@ -120,7 +121,7 @@ public class QueueController {
         return Map.of("ok", true);
     }
 
-    public record CallRequest(@NotBlank UUID stationId) {
+    public record CallRequest(@NotNull UUID stationId) {
     }
 
     public record FiliereRequest(@NotBlank String filiere) {

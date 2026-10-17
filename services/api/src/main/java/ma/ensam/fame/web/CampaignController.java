@@ -2,6 +2,7 @@ package ma.ensam.fame.web;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import ma.ensam.fame.domain.Campaign;
 import ma.ensam.fame.domain.CampaignStatus;
 import ma.ensam.fame.domain.Company;
@@ -122,7 +123,7 @@ public class CampaignController {
     public record RecruiterRequest(@NotBlank String fullName, String email, String title, String photoUrl) {
     }
 
-    public record CampaignCreateRequest(@NotBlank UUID companyId, @NotBlank String name,
+    public record CampaignCreateRequest(@NotNull UUID companyId, @NotBlank String name,
                                         String description, String location,
                                         Instant startsAt, Instant endsAt) {
     }

@@ -23,7 +23,7 @@ public class Station {
     @JoinColumn(name = "campaign_id", nullable = false)
     private Campaign campaign;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "recruiter_id")
     private Recruiter recruiter;
 
