@@ -12,6 +12,7 @@ import ma.ensam.fame.security.CurrentUser;
 import ma.ensam.fame.security.FameUserPrincipal;
 import ma.ensam.fame.security.StudentPrincipal;
 import ma.ensam.fame.service.QueueEngine;
+import ma.ensam.fame.service.SuperAdminService;
 import ma.ensam.fame.repository.StudentRegistrationRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,15 +32,18 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
     private final AuthService authService;
+    private final SuperAdminService superAdminService;
     private final StudentRegistrationRepository registrationRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
                           SecurityContextRepository securityContextRepository,
                           AuthService authService,
+                          SuperAdminService superAdminService,
                           StudentRegistrationRepository registrationRepository) {
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
         this.authService = authService;
+        this.superAdminService = superAdminService;
         this.registrationRepository = registrationRepository;
     }
 
@@ -65,6 +69,21 @@ public class AuthController {
     public Map<String, Object> challenge() {
         AuthService.ChallengeResponse c = authService.createChallenge();
         return Map.of("challenge", c.challenge(), "nonce", c.nonce(), "expiresIn", c.expiresInSeconds());
+    }
+
+    /* --------------------------- Superadmin login ---------------------- */
+
+    @PostMapping("/admin/login")
+    public Map<String, Object> adminLogin(@Valid @RequestBody AdminLoginRequest body,
+                                          HttpServletRequest request, HttpServletResponse response) {
+        FameUserPrincipal principal = superAdminService.authenticate(body.assertion());
+        establishSession(new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()),
+                request, response);
+        return Map.of(
+                "id", principal.id().toString(),
+                "username", principal.username(),
+                "displayName", principal.displayName(),
+                "role", principal.role().name());
     }
 
     @PostMapping("/student/assert")
@@ -159,6 +178,9 @@ public class AuthController {
     }
 
     public record StudentAssertRequest(@NotBlank String assertion, UUID campaignId) {
+    }
+
+    public record AdminLoginRequest(@NotBlank String assertion) {
     }
 
     public record RecoveryLoginRequest(@NotBlank String username, @NotBlank String password) {

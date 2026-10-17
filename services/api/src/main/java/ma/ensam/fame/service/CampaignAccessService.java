@@ -31,7 +31,7 @@ public class CampaignAccessService {
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> ApiException.notFound("CAMPAIGN_NOT_FOUND", "Campaign not found"));
 
-        if (user.role() == Role.ADMIN) {
+        if (user.role() == Role.ADMIN || user.role() == Role.SUPERADMIN) {
             return campaign;
         }
         if (!memberRepository.existsByCampaignIdAndUserId(campaignId, user.id())) {
@@ -41,7 +41,7 @@ public class CampaignAccessService {
     }
 
     public boolean canAccess(UUID campaignId, FameUserPrincipal user) {
-        if (user.role() == Role.ADMIN) {
+        if (user.role() == Role.ADMIN || user.role() == Role.SUPERADMIN) {
             return campaignRepository.existsById(campaignId);
         }
         return memberRepository.existsByCampaignIdAndUserId(campaignId, user.id());

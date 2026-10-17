@@ -72,9 +72,10 @@ public class SecurityConfig {
                     .requestMatchers("/api/v1/public/**").permitAll()
                     .requestMatchers("/actuator/health/**").permitAll()
                     .requestMatchers("/api/v1/docs/**", "/api/v1/openapi/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    .requestMatchers("/actuator/**").hasRole("ADMIN")
+                    .requestMatchers("/actuator/**").hasAnyRole("ADMIN", "SUPERADMIN")
                     .requestMatchers("/api/v1/realtime/**").authenticated()
-                    .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
+                    .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")
                     .anyRequest().authenticated())
             .exceptionHandling(e -> e
                     .authenticationEntryPoint(handlers)

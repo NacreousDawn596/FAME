@@ -30,7 +30,11 @@ public final class CurrentUser {
     }
 
     public static boolean isAdmin() {
-        return isStaff() && staff().role() == Role.ADMIN;
+        return isStaff() && (staff().role() == Role.ADMIN || staff().role() == Role.SUPERADMIN);
+    }
+
+    public static boolean isSuperAdmin() {
+        return isStaff() && staff().role() == Role.SUPERADMIN;
     }
 
     public static StudentPrincipal student() {
