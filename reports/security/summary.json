@@ -50,7 +50,7 @@
   "dependencyScans": {
     "web": { "productionVulnerabilities": 0, "devOnlyVulnerabilities": 8 },
     "worker": { "productionVulnerabilities": 0, "devOnlyVulnerabilities": 12 },
-    "backendOwaspDependencyCheck": "running"
+    "backendOwaspDependencyCheck": "blocked: NVD API key required (NIST API returns 403/404 without key); plugin configured in build.gradle + CI (NVD_API_KEY secret)"
   },
   "notPerformed": [
     "DAST (OWASP ZAP)",

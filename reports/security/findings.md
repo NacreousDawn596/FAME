@@ -68,6 +68,7 @@ Aucune vulnérabilité **production** critique/élevée non résolue.
 
 ## Non effectué / limites (honnête)
 
+- **OWASP Dependency-Check (backend)** : plugin configuré (`build.gradle`), mais l'exécution échoue sans clé NVD API (NIST renvoie 403/404). Le CI fournit `NVD_API_KEY`. Les dépendances Java sont épinglées et revues manuellement en attendant.
 - **DAST (ZAP)** et **Trivy** : outils absents de l'environnement ; prévus en CI.
 - **Charge 500 étudiants** : playbook k6 fourni, exécution non réalisée faute d'environnement de charge.
 - **Revue manuelle SchoolApp réel** : nécessite des comptes de test autorisés.

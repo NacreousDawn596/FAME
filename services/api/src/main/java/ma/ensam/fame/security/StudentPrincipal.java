@@ -3,6 +3,7 @@ package ma.ensam.fame.security;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +17,7 @@ public record StudentPrincipal(
         String studentCode,
         String fullName,
         String email
-) {
+) implements Serializable {
     public Collection<GrantedAuthority> authorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_STUDENT"));
     }
