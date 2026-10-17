@@ -1,0 +1,19 @@
+# FAME SchoolApp authentication worker
+name = "fame-schoolapp-auth"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# The only secrets required. Never commit these values.
+#   npx wrangler secret put SIGNING_PRIVATE_KEY
+# SIGNING_PRIVATE_KEY: base64url-encoded Ed25519 32-byte seed (generated below).
+#
+# Public key is derived from the private key; expose it with `GET /public-key`.
+
+[vars]
+# Fixed, allowlisted upstream SchoolApp origin (no arbitrary hosts allowed).
+SCHOOLAPP_BASE_URL = "https://schoolapp.ensam-umi.ac.ma"
+# Comma-separated allowlisted CORS origins.
+ALLOWED_ORIGINS = "http://localhost:5173"
+
+[observability]
+enabled = true

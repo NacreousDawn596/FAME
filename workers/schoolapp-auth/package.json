@@ -1,0 +1,21 @@
+{
+  "name": "fame-schoolapp-auth-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FAME SchoolApp authentication worker — verifies institutional credentials and emits short-lived signed identity assertions.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@noble/ed25519": "1.7.3",
+    "cheerio-without-node-native": "0.20.2"
+  },
+  "devDependencies": {
+    "vitest": "2.1.8",
+    "wrangler": "3.99.0"
+  }
+}

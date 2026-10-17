@@ -1,0 +1,33 @@
+{
+  "name": "schoolapp",
+  "version": "2.5.3",
+  "description": "A JavaScript library for interacting with the SchoolApp platform - clean, object-oriented access to grades, attendance, and profile data",
+  "main": "index.js",
+  "react-native": "index.js",
+  "scripts": {
+    "test": "node examples/basic_usage.js",
+    "test_package": "node test.js",
+    "test_http": "node test/http_client.test.js"
+  },
+  "keywords": [
+    "schoolapp",
+    "school",
+    "grades",
+    "attendance",
+    "api",
+    "client",
+    "ensam"
+  ],
+  "author": "Aferiad Kamal",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio-without-node-native": "^0.20.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NacreousDawn596/schoolapp.js.git"
+  }
+}
