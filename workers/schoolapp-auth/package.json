@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@noble/ed25519": "1.7.3",
-    "cheerio": "1.0.0"
+    "cheerio": "1.0.0",
+    "schoolapp": "^2.5.2"
   },
   "devDependencies": {
     "vitest": "2.1.8",

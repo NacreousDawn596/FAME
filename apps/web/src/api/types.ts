@@ -148,7 +148,6 @@ export interface BroadcastSummary {
 }
 
 export interface SafeConfig {
-  academicDomains: string;
   corsOrigins: string;
   workerIssuer: string;
   workerAudience: string;

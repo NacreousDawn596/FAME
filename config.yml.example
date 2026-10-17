@@ -46,9 +46,6 @@ fame:
     issuer: https://schoolapp-auth.gadzarts.xyz
     audience: fame-api
     assertion-ttl: 90s
-  academic:
-    # Comma-separated list of authorized academic email domains.
-    domains: ensam-umi.ac.ma
   vapid:
     # Web Push keys. Generate: npx web-push generate-vapid-keys
     public-key: change-me-vapid-public-key

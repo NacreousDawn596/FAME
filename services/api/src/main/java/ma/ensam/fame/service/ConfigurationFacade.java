@@ -16,9 +16,6 @@ public class ConfigurationFacade {
 
     private final SuperAdminProperties superAdminProperties;
 
-    @Value("${fame.academic.domains}")
-    private String academicDomains;
-
     @Value("${fame.cors.origins}")
     private String corsOrigins;
 
@@ -46,7 +43,6 @@ public class ConfigurationFacade {
 
     public Map<String, Object> safeView() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("academicDomains", academicDomains);
         map.put("corsOrigins", corsOrigins);
         map.put("workerIssuer", workerIssuer);
         map.put("workerAudience", workerAudience);

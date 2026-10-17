@@ -107,7 +107,7 @@ Points de sécurité non négociables :
 
 ### Inscription et éligibilité
 
-- Double validation : domaine académique autorisé **et** présence dans la liste blanche importée.
+- Double validation : niveau **5A** (dernière année) **et** présence dans la liste blanche importée. Le domaine email n'est pas restreint (Google, Proton, edu… peu importe, tant que la connexion SchoolApp réussit).
 - Import CSV avec détection de doublons, lignes malformées et résumé d'import (`imported` / `duplicates` / `errors`).
 - Compte de secours : identifiant + mot de passe temporaire à usage unique, généré après vérification physique de la carte étudiant, remplacement obligatoire du mot de passe au premier usage, expiration 30 min.
 - Abandon volontaire (« quitter la file ») qui retire immédiatement le profil des filtres.
@@ -281,7 +281,7 @@ sequenceDiagram
     W-->>R: {assertion} (JWT Ed25519, < 90 s)
     R->>A: POST /auth/student/assert {assertion, campaignId}
     A->>A: vérifie signature + issuer + audience + challenge + nonce
-    A->>A: vérifie domaine académique + liste blanche
+    A->>A: vérifie niveau 5A + liste blanche
     A-->>R: session applicative + vue étudiante
 ```
 

@@ -19,7 +19,7 @@
 
 | Catégorie | Menace | Contre-mesures |
 |-----------|--------|----------------|
-| **S**poofing | Usurpation d'identité étudiante | Assertion Ed25519 signée, challenge+nonce à usage unique, vérification du domaine académique + liste blanche. |
+| **S**poofing | Usurpation d'identité étudiante | Assertion Ed25519 signée, challenge+nonce à usage unique, vérification du niveau 5A + liste blanche. |
 | | Usurpation staff | BCrypt(12), rate-limiting de login, messages génériques (pas d'énumération). |
 | **T**ampering | Manipulation de la file (ordre, filière) | Serveur autoritaire ; séquence/horodatage serveur ; pas de confiance aux entrées client. |
 | | Falsification d'assertion | Signature vérifiée, issuer/audience/expiration strictes, anti-rejeu atomique. |

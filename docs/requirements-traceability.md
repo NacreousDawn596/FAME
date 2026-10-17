@@ -11,7 +11,7 @@ Légende : ✅ implémenté + testé · 🟡 implémenté, test partiel · ⬜ n
 | US 1.5 | Jumeau numérique 2D | ✅ | `RoomMapPage` + `saveLayout` |
 | US 2.1 | QR code d'inscription | ✅ | `/register/:campaignId` + route publique |
 | US 2.2 | SSO institutionnel | ✅ (auth par identifiant SchoolApp) | Worker tests |
-| US 2.3 | Double validation (domaine + liste blanche) | ✅ | `AuthService.authenticateStudent` |
+| US 2.3 | Double validation (niveau 5A + liste blanche) | ✅ | `AuthService.authenticateStudent` |
 | US 2.4 | Horodatage + session + rang | ✅ | `QueueEngine.register` (serveur) |
 | US 2.5 | Blocage anti-fraude (non-éligible) | ✅ | `NOT_ELIGIBLE` (403) |
 | US 2.6 | Compte de secours | ✅ | `RecoveryController` + `AuthService.createRecovery` |

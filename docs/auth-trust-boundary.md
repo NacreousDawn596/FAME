@@ -13,11 +13,11 @@ sequenceDiagram
     A-->>R: {challenge, nonce} (courte durée)
     R->>W: POST /login {email, password, challenge, nonce}
     W->>S: login + getProfile (client/cookie jar isolés)
-    W->>W: dérive identité (CNE, nom, email)
+    W->>W: dérive identité (CNE, nom, email, niveau)
     W-->>R: {assertion} (JWT Ed25519, <90s)
     R->>A: POST /auth/student/assert {assertion, campaignId}
     A->>A: vérifie signature/issuer/audience/expiration/challenge/nonce
-    A->>A: vérifie domaine académique + liste blanche (roster)
+    A->>A: vérifie niveau 5A + liste blanche (roster)
     A-->>R: session applicative (cookie) + vue étudiante
 ```
 

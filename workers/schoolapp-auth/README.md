@@ -92,6 +92,7 @@ The assertion is a JWT (`EdDSA`/Ed25519) with claims:
 | `sub` | normalized student code (`CNE/Masar`) |
 | `email` | institutional email |
 | `name` | full name |
+| `niveau` | academic level (e.g. `5A`) |
 | `challenge`, `nonce` | the FAME-issued single-use challenge binding |
 | `iat`, `nbf`, `exp` | issued/valid-from/expiry (TTL 90 s) |
 

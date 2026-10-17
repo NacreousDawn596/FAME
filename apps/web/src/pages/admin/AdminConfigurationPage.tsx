@@ -38,7 +38,6 @@ export default function AdminConfigurationPage() {
         <div className="card">
           <h3>Configuration applicative (lecture seule)</h3>
           <div className="grid cols-2 mt16">
-            <Row k="Domaines académiques" v={config.academicDomains} />
             <Row k="Origines CORS" v={config.corsOrigins} />
             <Row k="Émetteur Worker" v={config.workerIssuer} />
             <Row k="Audience" v={config.workerAudience} />

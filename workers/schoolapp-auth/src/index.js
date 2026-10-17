@@ -123,6 +123,7 @@ async function handleLogin(request, env) {
     sub: identity.studentCode,
     email: identity.email,
     name: identity.fullName,
+    niveau: identity.niveau,
     challenge,
     nonce,
     iat: now,
@@ -138,10 +139,12 @@ function extractIdentity(profile) {
   const personal = profile?.personal_info || {};
   const contact = profile?.contact_info || {};
   const basic = profile?.basic_info || {};
+  const administrative = profile?.administrative_info || {};
   return {
     studentCode: firstNonEmpty(personal['CNE/Masar'], personal['Code'], personal['Code Etudiant']),
     fullName: firstNonEmpty(basic.full_name, personal['Nom'] ? `${personal['Nom']} ${personal['Prénom'] || ''}` : null),
     email: firstNonEmpty(contact['Email'], personal['Email'], basic.email),
+    niveau: firstNonEmpty(administrative['Niveau']),
   };
 }
 

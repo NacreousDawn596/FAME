@@ -9,7 +9,6 @@ import ma.ensam.fame.repository.StudentRegistrationRepository;
 import ma.ensam.fame.security.SchoolAppAssertionVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,17 +17,19 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.Set;
 
 /**
- * Student authentication: SchoolApp assertion verification, academic-domain and
- * eligibility checks, and organizer-assisted emergency recovery.
+ * Student authentication: SchoolApp assertion verification, final-year
+ * (niveau 5A) and eligibility checks, and organizer-assisted emergency recovery.
  */
 @Service
 public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private static final SecureRandom RANDOM = new SecureRandom();
+
+    /** Expected academic level for eligible students (final year). */
+    public static final String FINAL_YEAR_NIVEAU = "5A";
 
     private final SchoolAppAssertionVerifier verifier;
     private final AuthChallengeRepository challengeRepository;
@@ -39,9 +40,6 @@ public class AuthService {
     private final QueueEngine queueEngine;
     private final RateLimiter rateLimiter;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${fame.academic.domains}")
-    private String academicDomains;
 
     public AuthService(SchoolAppAssertionVerifier verifier,
                        AuthChallengeRepository challengeRepository,
@@ -98,9 +96,13 @@ public class AuthService {
             throw ApiException.forbidden("CAMPAIGN_EXPIRED", "Campaign has ended");
         }
 
-        if (!isAcademicDomainAllowed(assertion.email())) {
-            log.warn("Rejected non-academic email domain for {}", assertion.studentCode());
-            throw ApiException.forbidden("DOMAIN_NOT_ALLOWED", "Email domain not allowed");
+        // Any email domain is accepted (Google, Proton, edu, etc.) as long as
+        // SchoolApp login succeeds. Eligibility is driven by the final-year
+        // niveau and the imported whitelist, not the email domain.
+        if (!isFinalYear(assertion.niveau())) {
+            log.warn("Rejected non-final-year student {} (niveau {})", assertion.studentCode(), assertion.niveau());
+            throw ApiException.forbidden("NOT_FINAL_YEAR",
+                    "Seuls les étudiants en 5A (dernière année) sont éligibles");
         }
 
         RosterEntry roster = rosterRepository
@@ -120,17 +122,10 @@ public class AuthService {
                 reg.getFullName(), reg.getEmail(), reg.isRecoveryAccount(), false);
     }
 
-    private boolean isAcademicDomainAllowed(String email) {
-        if (email == null || !email.contains("@")) {
-            return false;
-        }
-        String domain = email.substring(email.indexOf('@') + 1).trim().toLowerCase();
-        Set<String> allowed = java.util.stream.Stream.of(academicDomains.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(String::toLowerCase)
-                .collect(java.util.stream.Collectors.toSet());
-        return allowed.contains(domain);
+    /** Normalizes and checks that the SchoolApp "Niveau" is the final year (5A). */
+    static boolean isFinalYear(String niveau) {
+        if (niveau == null) return false;
+        return FINAL_YEAR_NIVEAU.equals(niveau.trim().toUpperCase().replaceAll("\\s+", ""));
     }
 
     /* ------------------------------------------------------------------ */

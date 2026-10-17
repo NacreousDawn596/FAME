@@ -11,7 +11,7 @@ const LOGIN_HTML = `<html><body><form><input name="_csrf" value="CSRFTOKENXYZ"/>
 
 const PROFILE_HTML = `<html><body>
 <div class="user-panel"><div class="info"><span>Ali Benali</span><span>Étudiant</span></div></div>
-<table class="table"><tr><th>Année</th><td>2025/2026</td></tr></table>
+<table class="table"><tr><th>Année</th><td>2025/2026</td></tr><tr><th>Niveau</th><td>5A</td></tr></table>
 <table class="table">
 <tr><th>CNE/Masar</th><td>CNE12345</td></tr>
 <tr><th>Nom</th><td>Benali</td></tr>
@@ -104,6 +104,7 @@ describe('SchoolApp auth worker', () => {
     expect(claims.sub).toBe('CNE12345');
     expect(claims.challenge).toBe('ch-1');
     expect(claims.nonce).toBe('nonce-1');
+    expect(claims.niveau).toBe('5A');
   });
 
   it('rejects invalid credentials with a generic error', async () => {

@@ -60,6 +60,7 @@ public class SchoolAppAssertionVerifier {
             String email,
             String fullName,
             String filiere,
+            String niveau,
             String challenge,
             String nonce
     ) {}
@@ -137,6 +138,7 @@ public class SchoolAppAssertionVerifier {
                 str(claims, "email"),
                 str(claims, "name"),
                 str(claims, "filiere"),
+                str(claims, "niveau"),
                 challenge,
                 nonce);
     }

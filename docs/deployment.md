@@ -18,7 +18,7 @@ Le backend est configuré **uniquement** via `config.yml` (voir `config.yml.exam
 |-----|-------------|
 | `fame.worker.public-key` | Clé publique Ed25519 du Worker (base64url). |
 | `fame.worker.issuer/audience` | URL du Worker émetteur + audience (`fame-api`). |
-| `fame.academic.domains` | Domaines email académiques autorisés. |
+| `fame.admin.email` | Email institutionnel du superadmin (identité, pas un mot de passe). |
 | `fame.vapid.public-key/private-key/subject` | Clés Web Push (VAPID). |
 | `fame.bootstrap.admin-*` | Compte bootstrap (créé au 1er démarrage). |
 | `fame.cors.origins` | Origines autorisées (CORS). |
