@@ -31,7 +31,7 @@ sequenceDiagram
 ## Garanties réelles vs. hypothèses
 
 - L'intégration `schoolapp.js` fournit une **authentification par identifiant/mot de passe** contre le portail SchoolApp (pas d'OAuth institutionnel). Aucun flux OAuth n'est inventé : nous utilisons uniquement la capacité vérifiée.
-- L'identité est dérivée du **profil SchoolApp** (`CNE/Masar`). La filière d'éligibilité provient du **roster importé par le comité**, jamais de l'assertion.
+- L'identité est dérivée du **profil SchoolApp** (`CNE/Masar`, `Niveau`, `Filière`). La filière provient de l'assertion signée (`administrative_info.Filière`), avec repli sur le roster importé.
 - Le secret de signature (`SIGNING_PRIVATE_KEY`) réside **uniquement** dans les secrets Cloudflare Worker. L'API ne détient que la clé publique.
 
 ## Audit du paquet `schoolapp.js` (v2.5.3, commit `d89de2a`)

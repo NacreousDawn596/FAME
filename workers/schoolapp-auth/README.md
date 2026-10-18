@@ -93,6 +93,7 @@ The assertion is a JWT (`EdDSA`/Ed25519) with claims:
 | `email` | institutional email |
 | `name` | full name |
 | `niveau` | academic level (e.g. `5A`) |
+| `filiere` | academic program (`administrative_info.Filière`) |
 | `challenge`, `nonce` | the FAME-issued single-use challenge binding |
 | `iat`, `nbf`, `exp` | issued/valid-from/expiry (TTL 90 s) |
 

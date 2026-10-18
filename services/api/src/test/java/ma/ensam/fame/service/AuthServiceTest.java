@@ -4,6 +4,8 @@ import ma.ensam.fame.common.ApiException;
 import ma.ensam.fame.domain.Campaign;
 import ma.ensam.fame.domain.CampaignStatus;
 import ma.ensam.fame.domain.Role;
+import ma.ensam.fame.domain.RosterEntry;
+import ma.ensam.fame.domain.StudentRegistration;
 import ma.ensam.fame.repository.*;
 import ma.ensam.fame.security.SchoolAppAssertionVerifier;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
@@ -85,5 +89,35 @@ class AuthServiceTest {
         assertThrows(ApiException.class, () -> service.authenticateStudent("assertion", campaign.getId()));
         // Progresses past the niveau check to the roster/eligibility check.
         verify(rosterRepository).findByCampaignIdAndStudentCode(any(), any());
+    }
+
+    @Test
+    void registersWithFiliereFromSchoolAppProfile() {
+        Campaign campaign = new Campaign();
+        campaign.setId(UUID.randomUUID());
+        campaign.setStatus(CampaignStatus.ACTIVE);
+
+        // Assertion carries the SchoolApp filière ("Génie Informatique");
+        // the roster's own filière ("Ancienne") must NOT be used.
+        when(verifier.verify(any())).thenReturn(new SchoolAppAssertionVerifier.Assertion(
+                "CNE1", "s@proton.me", "Ali", "Génie Informatique", "5A", "ch", "nonce"));
+        when(accessService.requireCampaign(any())).thenReturn(campaign);
+
+        RosterEntry roster = new RosterEntry();
+        roster.setFiliere("Ancienne");
+        when(rosterRepository.findByCampaignIdAndStudentCode(any(), any()))
+                .thenReturn(Optional.of(roster));
+        when(registrationRepository.findByCampaignIdAndStudentCode(any(), any()))
+                .thenReturn(Optional.empty());
+
+        StudentRegistration reg = new StudentRegistration();
+        reg.setId(UUID.randomUUID());
+        when(queueEngine.register(eq(campaign), eq("CNE1"), eq("s@proton.me"),
+                eq("Ali"), eq("Génie Informatique"), eq(false))).thenReturn(reg);
+
+        service.authenticateStudent("assertion", campaign.getId());
+
+        verify(queueEngine).register(eq(campaign), eq("CNE1"), eq("s@proton.me"),
+                eq("Ali"), eq("Génie Informatique"), eq(false));
     }
 }

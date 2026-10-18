@@ -124,6 +124,7 @@ async function handleLogin(request, env) {
     email: identity.email,
     name: identity.fullName,
     niveau: identity.niveau,
+    filiere: identity.filiere,
     challenge,
     nonce,
     iat: now,
@@ -145,6 +146,7 @@ function extractIdentity(profile) {
     fullName: firstNonEmpty(basic.full_name, personal['Nom'] ? `${personal['Nom']} ${personal['Prénom'] || ''}` : null),
     email: firstNonEmpty(contact['Email'], personal['Email'], basic.email),
     niveau: firstNonEmpty(administrative['Niveau']),
+    filiere: firstNonEmpty(administrative['Filière']),
   };
 }
 

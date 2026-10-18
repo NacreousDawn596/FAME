@@ -114,8 +114,12 @@ public class AuthService {
                 .orElse(null);
 
         if (reg == null) {
+            // Filière from the signed SchoolApp profile (administrative_info.Filière),
+            // falling back to the imported roster entry if the profile lacks it.
+            String filiere = (assertion.filiere() != null && !assertion.filiere().isBlank())
+                    ? assertion.filiere() : roster.getFiliere();
             reg = queueEngine.register(campaign, assertion.studentCode(),
-                    assertion.email(), assertion.fullName(), roster.getFiliere(), false);
+                    assertion.email(), assertion.fullName(), filiere, false);
         }
 
         return new AssertionResult(reg.getId(), campaignId, reg.getStudentCode(),
