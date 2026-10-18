@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Value("${fame.cors.origins}")
     private String corsOrigins;
 
+    @Value("${server.servlet.session.cookie.secure}")
+    private boolean cookieSecure;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
@@ -56,7 +59,7 @@ public class SecurityConfig {
             StaffAuthenticationProvider staffProvider) throws Exception {
 
         CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        csrfRepo.setCookieCustomizer(c -> c.sameSite("Lax"));
+        csrfRepo.setCookieCustomizer(c -> c.sameSite("Lax").secure(cookieSecure));
 
         http
             .authenticationProvider(staffProvider)
