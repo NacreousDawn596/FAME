@@ -134,6 +134,9 @@ public class AuthController {
             return Map.of("kind", "staff", "id", p.id().toString(), "username", p.username(),
                     "displayName", p.displayName(), "role", p.role().name());
         }
+        if (!CurrentUser.isStudent()) {
+            throw ApiException.unauthorized("NOT_AUTHENTICATED", "Authentication required");
+        }
         StudentPrincipal s = CurrentUser.student();
         StudentRegistration reg = registrationRepository.findById(s.registrationId())
                 .orElseThrow(() -> ApiException.notFound("REGISTRATION_NOT_FOUND", "Registration not found"));

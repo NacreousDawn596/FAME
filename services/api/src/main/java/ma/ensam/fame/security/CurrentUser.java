@@ -21,6 +21,11 @@ public final class CurrentUser {
         return a != null && a.getPrincipal() instanceof FameUserPrincipal;
     }
 
+    public static boolean isStudent() {
+        Authentication a = authentication();
+        return a != null && a.getPrincipal() instanceof StudentPrincipal;
+    }
+
     public static FameUserPrincipal staff() {
         Authentication a = authentication();
         if (a == null || !(a.getPrincipal() instanceof FameUserPrincipal p)) {

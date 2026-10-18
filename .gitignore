@@ -45,3 +45,5 @@ reports/security/tool-output/*
 tmp/
 
 *.docx
+
+./start.sh
