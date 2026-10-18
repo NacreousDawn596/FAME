@@ -55,9 +55,9 @@ public interface StudentRegistrationRepository extends JpaRepository<StudentRegi
 
     @Query("""
             select r from StudentRegistration r
-            where (:q is null or lower(r.fullName) like lower(concat('%', :q, '%'))
-                   or lower(r.studentCode) like lower(concat('%', :q, '%'))
-                   or lower(r.email) like lower(concat('%', :q, '%')))
+            where (lower(r.fullName) like lower(concat('%', coalesce(:q, ''), '%'))
+                   or lower(r.studentCode) like lower(concat('%', coalesce(:q, ''), '%'))
+                   or lower(r.email) like lower(concat('%', coalesce(:q, ''), '%')))
               and (:campaignId is null or r.campaign.id = :campaignId)
               and (:status is null or r.status = :status)
               and (:filiere is null or lower(r.filiere) = lower(:filiere))

@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import StaffLoginPage from './pages/StaffLoginPage';
-import SuperAdminLoginPage from './pages/SuperAdminLoginPage';
 import StudentRegisterPage from './pages/StudentRegisterPage';
 import StudentStatusPage from './pages/StudentStatusPage';
 import RegulatorDashboardPage from './pages/RegulatorDashboardPage';
@@ -37,7 +36,7 @@ function StaffRoute({ children }: { children: JSX.Element }) {
 function SuperAdminRoute({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth();
   if (loading) return <Loading />;
-  if (!me || me.kind !== 'staff') return <Navigate to="/admin/login" replace />;
+  if (!me || me.kind !== 'staff') return <Navigate to="/login" replace />;
   if (me.role !== 'SUPERADMIN') return <AccessDeniedPage />;
   return children;
 }
@@ -53,7 +52,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<StaffLoginPage />} />
-      <Route path="/admin/login" element={<SuperAdminLoginPage />} />
       <Route path="/register/:campaignId" element={<StudentRegisterPage />} />
       <Route path="/display/:campaignId" element={<PublicDisplayPage />} />
       <Route path="/student" element={<StudentRoute><StudentStatusPage /></StudentRoute>} />

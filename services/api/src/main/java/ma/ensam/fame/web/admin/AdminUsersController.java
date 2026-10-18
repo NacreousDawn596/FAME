@@ -79,6 +79,17 @@ public class AdminUsersController {
                 "createdAt", u.getCreatedAt().toString());
     }
 
+    @PostMapping("/recruiters")
+    public Map<String, Object> createRecruiter(@Valid @RequestBody RecruiterAccountRequest body) {
+        AppUser user = userService.createRecruiter(body.email(), body.password(), body.displayName(), actor());
+        return staffView(user);
+    }
+
+    @GetMapping("/recruiters")
+    public List<Map<String, Object>> recruiters(@RequestParam(required = false) String q) {
+        return userService.recruiters(q).stream().map(this::staffView).toList();
+    }
+
     private String actor() {
         return CurrentUser.staff().username();
     }
@@ -87,5 +98,11 @@ public class AdminUsersController {
     }
 
     public record RoleRequest(@NotNull Role role) {
+    }
+
+    public record RecruiterAccountRequest(
+            @jakarta.validation.constraints.NotBlank String email,
+            @jakarta.validation.constraints.NotBlank String password,
+            String displayName) {
     }
 }

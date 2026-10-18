@@ -35,9 +35,10 @@ server:
 
 fame:
   admin:
-    # Designated superadmin institutional email (SchoolApp-verified). This is
-    # the single source of truth for the superadmin identity (NOT a password).
-    email: superadmin@ensam-umi.ac.ma
+    # Designated superadmin identity (email + password, DB-backed). Seeded on
+    # first startup. Change the password after first login.
+    email: superadmin@example.com
+    password: change-me-superadmin-password
   worker:
     # Public key (Ed25519, base64url) matching the Cloudflare Worker's private
     # key (SIGNING_PRIVATE_KEY secret). Get it from `GET /public-key` on the

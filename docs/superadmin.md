@@ -2,18 +2,21 @@
 
 ## Identité superadmin
 
-Le superadmin est identifié par son **email institutionnel vérifié** (via le flux SchoolApp), comparé côté serveur à la configuration `fame.admin.email` (`config.yml`). Ce n'est **pas** un mot de passe — l'authentification exige toujours l'assertion SchoolApp signée.
+Le superadmin est un compte **email + mot de passe** (stocké en base), seedé au premier démarrage depuis `fame.admin.email` + `fame.admin.password` (`config.yml`).
 
-- **Normalisation** : `email.trim().toLowerCase()` des deux côtés.
+- **Normalisation** : `email.trim().toLowerCase()`.
 - **Autorité** : la configuration serveur (`config.yml`) est la source de vérité. Le frontend ne fournit jamais d'email ou de rôle pour s'auto-promouvoir.
-- **Backing account** : un `AppUser` (rôle `SUPERADMIN`) est créé/trouvé avec un mot de passe local aléatoire inutilisable (login local impossible par mot de passe).
-- **Rôle** : `ROLE_SUPERADMIN`, distinct des rôles `ADMIN`/`ORGANIZER` (« administrateurs ordinaires »).
+- **Compte** : un `AppUser` (rôle `SUPERADMIN`) est créé si absent ; le mot de passe est hashé (BCrypt).
+- **Rôle** : `ROLE_SUPERADMIN`, distinct de `ADMIN`/`ORGANIZER`/`RECRUITER`.
 
 ## Connexion
 
-1. `GET /api/v1/auth/csrf` puis `POST /api/v1/auth/student/challenge`.
-2. Envoyer les identifiants SchoolApp au Worker → assertion signée.
-3. `POST /api/v1/auth/admin/login { assertion }` → session `ROLE_SUPERADMIN`.
+Une page de connexion unique (`/login`) pour tous les comptes : superadmin, admin, organizer, recruteur. L'email est utilisé comme identifiant, le mot de passe est vérifié contre la base (BCrypt) :
+
+1. `GET /api/v1/auth/csrf`.
+2. `POST /api/v1/auth/login { email, password }` → session selon le rôle.
+
+Les étudiants, eux, passent toujours par le flux SchoolApp (QR code d'inscription), pas par cette page.
 
 ## Autorisation
 
@@ -29,6 +32,7 @@ Le superadmin a un accès global aux campagnes (isolation inter-campagnes non af
 
 - `GET /api/admin/overview` — agrégats (campagnes, étudiants, postes, actions récentes, diffusions).
 - `GET/PATCH /api/admin/users` — personnel (désactivation, rôle, révocation de sessions).
+- `POST/GET /api/admin/recruiters` — création et liste des comptes recruteurs (email + mot de passe).
 - `GET /api/admin/students` — recherche d'étudiants (pagination/filtres).
 - `GET /api/admin/audit` + `/export` — journal append-only (aucun `DELETE`).
 - `GET/POST/PUT/DELETE /api/admin/notifications/templates` + `/preview` + `/send` + liste des diffusions.

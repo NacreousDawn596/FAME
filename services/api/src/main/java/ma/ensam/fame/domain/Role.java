@@ -1,9 +1,11 @@
 package ma.ensam.fame.domain;
 
 public enum Role {
-    /** Platform superadmin — granted only after SchoolApp-verified email matches config. */
+    /** Platform superadmin — full control over the control center. */
     SUPERADMIN,
     /** Platform administrator / delegated campaign manager. */
     ADMIN,
-    ORGANIZER
+    ORGANIZER,
+    /** Recruiter account (email + password, DB-backed). */
+    RECRUITER
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n/LocaleContext';
@@ -9,7 +9,7 @@ export default function StaffLoginPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { setMe } = useAuth();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -20,9 +20,10 @@ export default function StaffLoginPage() {
     setError(null);
     try {
       await api.get('/auth/csrf');
-      const me = await api.post<StaffMe>('/auth/staff/login', { username, password });
+      const me = await api.post<StaffMe>('/auth/login', { email, password });
       setMe(me);
-      navigate(me.role === 'ADMIN' ? '/admin' : '/dashboard', { replace: true });
+      if (me.role === 'SUPERADMIN') navigate('/admin', { replace: true });
+      else navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error'));
     } finally {
@@ -40,9 +41,9 @@ export default function StaffLoginPage() {
         </div>
         <form onSubmit={submit}>
           <div className="field">
-            <label className="label" htmlFor="username">{t('username')}</label>
-            <input id="username" className="input" autoComplete="username" value={username}
-              onChange={(e) => setUsername(e.target.value)} required />
+            <label className="label" htmlFor="email">Email</label>
+            <input id="email" className="input" type="email" autoComplete="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="field">
             <label className="label" htmlFor="password">{t('password')}</label>
@@ -54,9 +55,6 @@ export default function StaffLoginPage() {
             {busy ? t('loading') : t('signIn')}
           </button>
         </form>
-        <div className="text-center mt16">
-          <Link className="btn btn-ghost btn-sm" to="/admin/login">Espace superadmin (SchoolApp)</Link>
-        </div>
       </div>
     </div>
   );

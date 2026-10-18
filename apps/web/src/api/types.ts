@@ -56,7 +56,7 @@ export interface StaffMe {
   id: string;
   username: string;
   displayName: string;
-  role: 'SUPERADMIN' | 'ADMIN' | 'ORGANIZER';
+  role: 'SUPERADMIN' | 'ADMIN' | 'ORGANIZER' | 'RECRUITER';
 }
 
 export interface StudentMe {

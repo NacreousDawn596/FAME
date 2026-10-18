@@ -12,7 +12,6 @@ import ma.ensam.fame.security.CurrentUser;
 import ma.ensam.fame.security.FameUserPrincipal;
 import ma.ensam.fame.security.StudentPrincipal;
 import ma.ensam.fame.service.QueueEngine;
-import ma.ensam.fame.service.SuperAdminService;
 import ma.ensam.fame.repository.StudentRegistrationRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,28 +31,29 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
     private final AuthService authService;
-    private final SuperAdminService superAdminService;
     private final StudentRegistrationRepository registrationRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
                           SecurityContextRepository securityContextRepository,
                           AuthService authService,
-                          SuperAdminService superAdminService,
                           StudentRegistrationRepository registrationRepository) {
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
         this.authService = authService;
-        this.superAdminService = superAdminService;
         this.registrationRepository = registrationRepository;
     }
 
-    /* ------------------------------ Staff login ------------------------ */
+    /* -------------------------- Unified staff login --------------------- */
 
-    @PostMapping("/staff/login")
-    public Map<String, Object> staffLogin(@Valid @RequestBody StaffLoginRequest body,
-                                          HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping("/login")
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest body,
+                                     HttpServletRequest request, HttpServletResponse response) {
+        // A single login for every DB-backed account (superadmin, admin,
+        // organizer, recruiter). Emails are normalized; the backing account
+        // uses the email as its username.
+        String identifier = normalizeIdentifier(body.email());
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(body.username(), body.password()));
+                new UsernamePasswordAuthenticationToken(identifier, body.password()));
         establishSession(auth, request, response);
         FameUserPrincipal principal = (FameUserPrincipal) auth.getPrincipal();
         return Map.of(
@@ -63,27 +63,18 @@ public class AuthController {
                 "role", principal.role().name());
     }
 
+    private static String normalizeIdentifier(String identifier) {
+        if (identifier == null) return null;
+        String v = identifier.trim();
+        return v.contains("@") ? v.toLowerCase() : v;
+    }
+
     /* --------------------------- Student challenge --------------------- */
 
     @PostMapping("/student/challenge")
     public Map<String, Object> challenge() {
         AuthService.ChallengeResponse c = authService.createChallenge();
         return Map.of("challenge", c.challenge(), "nonce", c.nonce(), "expiresIn", c.expiresInSeconds());
-    }
-
-    /* --------------------------- Superadmin login ---------------------- */
-
-    @PostMapping("/admin/login")
-    public Map<String, Object> adminLogin(@Valid @RequestBody AdminLoginRequest body,
-                                          HttpServletRequest request, HttpServletResponse response) {
-        FameUserPrincipal principal = superAdminService.authenticate(body.assertion());
-        establishSession(new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()),
-                request, response);
-        return Map.of(
-                "id", principal.id().toString(),
-                "username", principal.username(),
-                "displayName", principal.displayName(),
-                "role", principal.role().name());
     }
 
     @PostMapping("/student/assert")
@@ -174,13 +165,10 @@ public class AuthController {
 
     /* ------------------------------ DTOs ------------------------------- */
 
-    public record StaffLoginRequest(@NotBlank String username, @NotBlank String password) {
+    public record LoginRequest(@NotBlank String email, @NotBlank String password) {
     }
 
     public record StudentAssertRequest(@NotBlank String assertion, UUID campaignId) {
-    }
-
-    public record AdminLoginRequest(@NotBlank String assertion) {
     }
 
     public record RecoveryLoginRequest(@NotBlank String username, @NotBlank String password) {

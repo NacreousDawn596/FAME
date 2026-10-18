@@ -16,8 +16,8 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
 
     @Query("""
             select u from AppUser u
-            where (:q is null or lower(u.username) like lower(concat('%', :q, '%'))
-                   or lower(u.displayName) like lower(concat('%', :q, '%')))
+            where (lower(u.username) like lower(concat('%', coalesce(:q, ''), '%'))
+                   or lower(u.displayName) like lower(concat('%', coalesce(:q, ''), '%')))
               and (:role is null or u.role = :role)
             order by u.createdAt desc
             """)

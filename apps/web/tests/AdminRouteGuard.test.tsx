@@ -29,10 +29,10 @@ describe('Superadmin route guard', () => {
     vi.clearAllMocks();
   });
 
-  it('redirects anonymous users to the superadmin login', () => {
+  it('redirects anonymous users to the unified login page', () => {
     mockMe = null;
     renderAt('/admin');
-    expect(screen.getByText('Superadmin')).toBeInTheDocument();
+    expect(screen.getByText('FAME')).toBeInTheDocument();
   });
 
   it('denies a non-superadmin staff member', () => {

@@ -51,7 +51,7 @@ public class ConfigurationFacade {
         map.put("vapidConfigured", vapidPublicKey != null && !vapidPublicKey.isBlank()
                 && vapidPrivateKey != null && !vapidPrivateKey.isBlank());
         map.put("bootstrapAdminUsername", bootstrapAdminUsername);
-        map.put("superAdminConfigured", superAdminProperties.email() != null && !superAdminProperties.email().isBlank());
+        map.put("superAdminConfigured", superAdminProperties.isConfigured());
         // Never expose: superadmin email, VAPID private key, DB/Redis passwords.
         return map;
     }

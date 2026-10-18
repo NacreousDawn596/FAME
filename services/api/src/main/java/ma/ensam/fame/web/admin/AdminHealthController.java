@@ -50,7 +50,7 @@ public class AdminHealthController {
         result.put("database", check("database", () -> jdbc.queryForObject("SELECT 1", Integer.class) != null));
         result.put("redis", check("redis", () -> redis.getConnectionFactory().getConnection().ping() != null));
         result.put("vapidConfigured", facade.safeView().get("vapidConfigured"));
-        result.put("superAdminConfigured", superAdminProperties.email() != null && !superAdminProperties.email().isBlank());
+        result.put("superAdminConfigured", superAdminProperties.isConfigured());
         result.put("pendingPushDeliveries",
                 recipientRepository.findTop100ByStatusInOrderByIdAsc(
                         List.of(ma.ensam.fame.domain.BroadcastRecipient.Status.PENDING)).size());

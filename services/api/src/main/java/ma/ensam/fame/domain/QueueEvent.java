@@ -19,7 +19,7 @@ public class QueueEvent {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "campaign_id", nullable = false)
+    @Column(name = "campaign_id")
     private UUID campaignId;
 
     @Column(name = "entity_type", nullable = false, length = 40)
