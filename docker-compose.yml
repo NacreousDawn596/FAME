@@ -32,15 +32,9 @@ services:
     build:
       context: ./services/api
     # Backend is configured exclusively via config.yml (mounted below).
-    # Copy config.yml.example -> config.yml and adjust. Infra topology
-    # (DB/Redis host) is overridden here for the compose network.
-    environment:
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fame}
-      DB_USERNAME: ${POSTGRES_USER:-fame}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-fame}
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    # Copy config.yml.example -> config.yml and adjust (datasource, Redis,
+    # worker, VAPID, superadmin, CORS). No env-var overrides here, so the
+    # mounted file is the single source of truth.
     volumes:
       - ./config.yml:/app/config.yml:ro
     depends_on:
