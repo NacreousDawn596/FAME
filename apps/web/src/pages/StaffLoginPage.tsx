@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n/LocaleContext';
@@ -54,6 +54,9 @@ export default function StaffLoginPage() {
             {busy ? t('loading') : t('signIn')}
           </button>
         </form>
+        <div className="text-center mt16">
+          <Link className="btn btn-ghost btn-sm" to="/admin/login">Espace superadmin (SchoolApp)</Link>
+        </div>
       </div>
     </div>
   );
