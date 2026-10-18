@@ -57,6 +57,7 @@ public class AuthController {
         establishSession(auth, request, response);
         FameUserPrincipal principal = (FameUserPrincipal) auth.getPrincipal();
         return Map.of(
+                "kind", "staff",
                 "id", principal.id().toString(),
                 "username", principal.username(),
                 "displayName", principal.displayName(),
