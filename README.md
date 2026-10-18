@@ -221,12 +221,46 @@ erDiagram
     STUDENT_REGISTRATION ||--o{ BROADCAST_RECIPIENT : ""
     BROADCAST ||--o{ BROADCAST_RECIPIENT : ""
 
-    APP_USER { uuid id PK; string username UK; string password_hash; role role; bool enabled }
-    CAMPAIGN { uuid id PK; string name; CampaignStatus status; bigint version }
-    ROSTER_ENTRY { uuid id PK; string student_code; UK(campaign_id, student_code) }
-    STATION { uuid id PK; string filiere; StationStatus status; double pos_x; double pos_y }
-    STUDENT_REGISTRATION { uuid id PK; bigint sequence_no; timestamp arrival_at; QueueStatus status; UK(campaign_id, student_code) }
-    QUEUE_EVENT { uuid id PK; string action; timestamp occurred_at }
+    APP_USER {
+        uuid id PK
+        string username UK
+        string password_hash
+        string role
+        boolean enabled
+    }
+    CAMPAIGN {
+        uuid id PK
+        string name
+        string status
+        bigint version
+    }
+    ROSTER_ENTRY {
+        uuid id PK
+        string student_code
+        string email
+        string full_name
+        string filiere
+    }
+    STATION {
+        uuid id PK
+        string label
+        string filiere
+        string status
+        double pos_x
+        double pos_y
+    }
+    STUDENT_REGISTRATION {
+        uuid id PK
+        string student_code
+        bigint sequence_no
+        datetime arrival_at
+        string status
+    }
+    QUEUE_EVENT {
+        uuid id PK
+        string action
+        datetime occurred_at
+    }
 ```
 
 Faits notables :
