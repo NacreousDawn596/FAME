@@ -16,7 +16,7 @@ const PROFILE_HTML = `<html><body>
 <tr><th>CNE/Masar</th><td>CNE12345</td></tr>
 <tr><th>Nom</th><td>Benali</td></tr>
 <tr><th>Prénom</th><td>Ali</td></tr>
-<tr><th>Email</th><td>ali.benali@ensam-umi.ac.ma</td></tr>
+<tr><th>Email</th><td>kamal.aferiad@ensam.ac.ma</td></tr>
 </table>
 </body></html>`;
 
@@ -106,6 +106,8 @@ describe('SchoolApp auth worker', () => {
     expect(claims.nonce).toBe('nonce-1');
     expect(claims.niveau).toBe('5A');
     expect(claims.filiere).toBe('Génie Informatique');
+    // email claim = LOGIN email, not the profile email (kamal.aferiad@ensam.ac.ma).
+    expect(claims.email).toBe('ali.benali@ensam-umi.ac.ma');
   });
 
   it('rejects invalid credentials with a generic error', async () => {

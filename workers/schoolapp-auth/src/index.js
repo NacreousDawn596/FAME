@@ -121,8 +121,10 @@ async function handleLogin(request, env) {
     iss: env.ISSUER || DEFAULT_ISSUER,
     aud: AUDIENCE,
     sub: identity.studentCode,
-    email: identity.email,
-    name: identity.fullName,
+    // Identity email = the login email the user authenticated with, NOT the
+    // profile's stored institutional email.
+    email: normalizeEmail(email),
+    name: clean(identity.fullName),
     niveau: identity.niveau,
     filiere: identity.filiere,
     challenge,
@@ -155,4 +157,14 @@ function firstNonEmpty(...values) {
     if (v && String(v).trim()) return String(v).trim();
   }
   return null;
+}
+
+function normalizeEmail(value) {
+  return (value || '').trim().toLowerCase();
+}
+
+/** Collapse internal whitespace/newlines/tabs so names render cleanly. */
+function clean(value) {
+  if (!value) return null;
+  return String(value).replace(/\s+/g, ' ').trim();
 }

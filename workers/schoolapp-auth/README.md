@@ -90,7 +90,7 @@ The assertion is a JWT (`EdDSA`/Ed25519) with claims:
 | `iss` | `env.ISSUER` (default `https://schoolapp-auth.gadzarts.xyz`) |
 | `aud` | `fame-api` |
 | `sub` | normalized student code (`CNE/Masar`) |
-| `email` | institutional email |
+| `email` | the **login** email used to authenticate (not the profile's stored email) |
 | `name` | full name |
 | `niveau` | academic level (e.g. `5A`) |
 | `filiere` | academic program (`administrative_info.Filière`) |
