@@ -2,15 +2,14 @@
 name = "fame-schoolapp"
 main = "schoolapp.js"
 compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Issuer / audience must match the FAME backend (SCHOOLAPP_ISSUER / SCHOOLAPP_AUDIENCE).
 SCHOOLAPP_ISSUER = "fame-schoolapp"
 SCHOOLAPP_AUDIENCE = "fame-api"
-# Upstream SchoolApp authentication API base URL.
-# Set this to your real SchoolApp API before the Worker can authenticate students.
-# The Worker POSTs {username,password} to {URL}/auth/login and expects
-# {name, lastName, year, ensamCode, filiere} in response.
+# Optional override for the SchoolApp base URL. Leave empty to use the library
+# default (https://schoolapp.ensam-umi.ac.ma).
 SCHOOLAPP_API_URL = ""
 # CORS origin for the FAME frontend.
 ALLOWED_ORIGIN = "*"

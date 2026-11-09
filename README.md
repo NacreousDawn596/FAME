@@ -67,6 +67,7 @@ FAME_ORGANIZER_PASSWORD=... npm run test:e2e
 backend/    FastAPI app, Alembic migrations, tests
 frontend/   React PWA + organizer dashboard
 schoolapp.js Cloudflare Worker (SchoolApp auth)
+vendor/schoolapp/  vendored schoolapp.js client library
 infra/      Dockerfiles + nginx
 scripts/    key generation + organizer CLI
 docs/       architecture, auth, queue, notifications, deployment

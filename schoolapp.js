@@ -1,7 +1,8 @@
 /**
  * SchoolApp authentication Cloudflare Worker.
  *
- * Authenticates a candidate against ENSAM's SchoolApp and returns a short-lived,
+ * Authenticates a candidate against ENSAM's SchoolApp (via the schoolapp.js
+ * client library vendored under vendor/schoolapp) and returns a short-lived,
  * Ed25519-signed JWT identity assertion for the FAME backend.
  *
  * The FAME backend verifies this assertion using the matching *public* key and
@@ -9,20 +10,15 @@
  * Worker secret and never reaches the browser or the FAME backend.
  *
  * Required Worker secrets / bindings (see docs/authentication.md):
- *   - SCHOOLAPP_PRIVATE_KEY : base64url Ed25519 32-byte seed (from scripts/generate_keys.py)
+ *   - SCHOOLAPP_PRIVATE_KEY : base64url Ed25519 32-byte seed (scripts/generate_keys.py)
  *   - SCHOOLAPP_ISSUER      : e.g. "fame-schoolapp"
  *   - SCHOOLAPP_AUDIENCE    : e.g. "fame-api"
- *   - SCHOOLAPP_API_URL     : upstream SchoolApp API base URL
- *   - ALLOWED_ORIGIN        : the FAME frontend origin (CORS)
- *
- * The upstream SchoolApp API is expected to expose:
- *   POST {SCHOOLAPP_API_URL}/auth/login
- *     body:     { "username": string, "password": string }
- *     response: { "name": string, "lastName": string, "year": string,
- *                 "ensamCode": string, "filiere": string }
- *
- * If your SchoolApp API has a different contract, adapt `authenticateWithSchoolApp`.
+ *   - ALLOWED_ORIGIN        : the FAME frontend origin (CORS), or "*"
+ *   - SCHOOLAPP_API_URL     : optional override for the SchoolApp base URL
+ *                             (defaults to https://schoolapp.ensam-umi.ac.ma)
  */
+
+import { SchoolAppClient } from "./vendor/schoolapp/src/school_app_client.js";
 
 const ISSUER = globalThis.SCHOOLAPP_ISSUER || "fame-schoolapp";
 const AUDIENCE = globalThis.SCHOOLAPP_AUDIENCE || "fame-api";
@@ -58,32 +54,60 @@ async function getSigningKey() {
 }
 
 /**
- * Authenticate the candidate against the upstream SchoolApp API.
- * Returns the normalized identity object, or throws on failure.
+ * Authenticate the candidate against the upstream SchoolApp using the
+ * schoolapp.js client library, and return the normalized identity object.
  */
 async function authenticateWithSchoolApp(username, password) {
-  const base = globalThis.SCHOOLAPP_API_URL;
-  if (!base) {
-    throw new Error("SCHOOLAPP_API_URL is not configured on this Worker");
+  const override = globalThis.SCHOOLAPP_API_URL;
+  const client = override ? new SchoolAppClient(override) : new SchoolAppClient();
+
+  const loggedIn = await client.login(username, password);
+  if (!loggedIn) {
+    throw new Error("Invalid SchoolApp credentials");
   }
-  const res = await fetch(`${base.replace(/\/$/, "")}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-  if (!res.ok) {
-    throw new Error(`SchoolApp authentication failed (${res.status})`);
+
+  const profile = await client.getProfile();
+  if (!profile) {
+    throw new Error("Could not retrieve SchoolApp profile");
   }
-  const data = await res.json();
-  if (!data || typeof data.ensamCode !== "string" || !data.ensamCode) {
-    throw new Error("SchoolApp response missing ensamCode");
+
+  const personal = profile.personal_info || {};
+  const academic = profile.academic_info || {};
+  const administrative = profile.administrative_info || {};
+
+  const ensamCode =
+    personal["Code"] ||
+    administrative["Code"] ||
+    personal["CNE/Masar"] ||
+    administrative["CNE/Masar"] ||
+    "";
+  const firstName = personal["Prénom"] || personal["Nom"]?.split(" ")[0] || "";
+  const lastName = personal["Nom"] || "";
+  const year =
+    academic["Niveau Accès"] || academic["Annee Accès"] || "";
+
+  // The student's current filière comes from their academic-year results.
+  let filiere = "";
+  try {
+    const annees = await client.getAnnee();
+    if (Array.isArray(annees) && annees.length > 0) {
+      const current = annees[annees.length - 1];
+      filiere = current.Filiere || current.filiere || "";
+    }
+  } catch (err) {
+    console.warn("[FAME] Could not resolve filiere:", err?.message);
   }
+
+  if (!ensamCode) {
+    throw new Error("SchoolApp profile is missing the student code");
+  }
+
   return {
-    name: data.name || "",
-    lastName: data.lastName || "",
-    year: data.year || "",
-    ensamCode: data.ensamCode,
-    filiere: data.filiere || "",
+    name: firstName,
+    lastName: lastName,
+    year: year,
+    ensamCode: ensamCode,
+    filiere: filiere,
   };
 }
 

@@ -13,8 +13,14 @@ assertion.
 
 1. Frontend collects SchoolApp username/password.
 2. Frontend calls `POST {WORKER}/auth`.
-3. The Worker calls the upstream SchoolApp API and normalizes the identity
-   (`name`, `lastName`, `year`, `ensamCode`, `filiere`).
+3. The Worker authenticates via the vendored [`schoolapp.js`](https://github.com/NacreousDawn596/schoolapp.js)
+   client (`vendor/schoolapp/`), which talks to `https://schoolapp.ensam-umi.ac.ma`.
+   It logs in, fetches the profile, and normalizes the identity:
+   - `ensamCode` ← profile `personal_info.Code` (fallback `administrative_info.Code`, then `CNE/Masar`)
+   - `name` ← `personal_info.Prénom`
+   - `lastName` ← `personal_info.Nom`
+   - `year` ← `academic_info["Niveau Accès"]` (fallback `Annee Accès`)
+   - `filiere` ← the current academic-year result's `Filiere` (`getAnnee()`)
 4. The Worker signs a short-lived (5 min) Ed25519 JWT:
    `sub` = `ensamCode`, `name`, `lastName`, `year`, `filiere`, `iss`, `aud`,
    `iat`, `exp`.
