@@ -52,8 +52,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "${API_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')\""]
       interval: 10s
@@ -93,14 +91,10 @@ services:
       context: .
       dockerfile: infra/docker/frontend.Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
-        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8000}
         VITE_SCHOOLAPP_WORKER_URL: ${VITE_SCHOOLAPP_WORKER_URL:-https://schoolapp-worker.example.workers.dev}
     restart: unless-stopped
     depends_on:
       - api
-    ports:
-      - "${FRONTEND_PORT:-8080}:80"
     networks:
       - fame
     logging:
@@ -114,7 +108,7 @@ services:
       - api
       - frontend
     ports:
-      - "${HTTP_PORT:-80}:80"
+      - "${PORT:-5483}:80"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:

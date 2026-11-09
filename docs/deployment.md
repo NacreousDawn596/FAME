@@ -47,9 +47,14 @@ docker compose up -d --build
 
 Services: `postgres`, `redis`, `api`, `worker`, `frontend`, `nginx`.
 
-- Frontend: http://localhost:8080 (or port `FRONTEND_PORT`).
-- Reverse proxy: http://localhost:80 (port `HTTP_PORT`).
-- API docs (OpenAPI): http://localhost:8000/docs
+Everything is exposed through a **single port** (`PORT`, default **5483**):
+
+- App (candidate PWA + organizer dashboard): http://localhost:5483
+- API (routed by nginx): http://localhost:5483/api/v1
+
+The `api` and `frontend` services bind only to the internal Docker network and
+are not published to the host. OpenAPI docs are served by the backend in dev
+(`uvicorn` on :8000 at `/docs`).
 
 ## 5. Database initialization
 

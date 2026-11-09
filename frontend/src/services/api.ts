@@ -12,14 +12,14 @@ import type {
   QueueStatusResponse,
 } from "@/types";
 
-const API_URL = __API_URL__;
-
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers, credentials: "include" });
+  // Same-origin relative URL: in dev the Vite proxy forwards /api to the backend,
+  // in production the nginx reverse proxy routes /api to the api service.
+  const res = await fetch(path, { ...options, headers, credentials: "include" });
   if (res.status === 401) {
     throw new ApiError(401, "Unauthorized");
   }

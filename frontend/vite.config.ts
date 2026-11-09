@@ -36,7 +36,6 @@ export default defineConfig({
     }),
   ],
   define: {
-    __API_URL__: JSON.stringify(apiUrl),
     __WS_URL__: JSON.stringify(wsUrl),
     __SCHOOLAPP_WORKER_URL__: JSON.stringify(schoolappWorkerUrl),
   },
