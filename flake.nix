@@ -39,21 +39,6 @@
             echo "  run      -> make up"
           '';
         };
-
-        # Reproducible frontend static bundle. The frontend is compiled at build
-        # time (no runtime downloads). Backend Python deps are pinned by uv.lock
-        # and baked into the Docker image at build time.
-        packages.frontend = pkgs.buildNpmPackage {
-          pname = "fame-frontend";
-          version = "1.0.0";
-          src = ./fame-react;
-          npmDepsHash = "";
-          npmBuild = "build";
-          installPhase = ''
-            mkdir -p $out
-            cp -r dist/* $out/
-          '';
-        };
       }
     );
 }
