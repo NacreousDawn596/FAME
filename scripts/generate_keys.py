@@ -18,9 +18,10 @@ def b64url(data: bytes) -> str:
 
 def schoolapp_keys() -> tuple[str, str]:
     key = ed25519.Ed25519PrivateKey.generate()
+    # PKCS#8 DER — importable by WebCrypto (Cloudflare Workers) as a private key.
     private = key.private_bytes(
-        serialization.Encoding.Raw,
-        serialization.PrivateFormat.Raw,
+        serialization.Encoding.DER,
+        serialization.PrivateFormat.PKCS8,
         serialization.NoEncryption(),
     )
     public = key.public_key().public_bytes(

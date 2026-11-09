@@ -10,7 +10,7 @@
  * Worker secret and never reaches the browser or the FAME backend.
  *
  * Required Worker secrets / bindings (see docs/authentication.md):
- *   - SCHOOLAPP_PRIVATE_KEY : base64url Ed25519 32-byte seed (scripts/generate_keys.py)
+ *   - SCHOOLAPP_PRIVATE_KEY : base64url Ed25519 PKCS#8 DER key (scripts/generate_keys.py)
  *   - SCHOOLAPP_ISSUER      : e.g. "fame-schoolapp"
  *   - SCHOOLAPP_AUDIENCE    : e.g. "fame-api"
  *   - ALLOWED_ORIGIN        : the FAME frontend origin (CORS), or "*"
@@ -20,8 +20,8 @@
 
 import { SchoolAppClient } from "./vendor/schoolapp/src/school_app_client.js";
 
-const ISSUER = globalThis.SCHOOLAPP_ISSUER || "fame-schoolapp";
-const AUDIENCE = globalThis.SCHOOLAPP_AUDIENCE || "fame-api";
+const DEFAULT_ISSUER = "fame-schoolapp";
+const DEFAULT_AUDIENCE = "fame-api";
 const ASSERTION_TTL_SECONDS = 300;
 
 const encoder = new TextEncoder();
@@ -46,19 +46,19 @@ function b64urlDecode(input) {
   return bytes;
 }
 
-async function getSigningKey() {
-  const secret = globalThis.SCHOOLAPP_PRIVATE_KEY;
+async function getSigningKey(env) {
+  const secret = env.SCHOOLAPP_PRIVATE_KEY;
   if (!secret) throw new Error("SCHOOLAPP_PRIVATE_KEY secret is not configured");
-  const seed = b64urlDecode(secret);
-  return crypto.subtle.importKey("raw", seed, { name: "Ed25519" }, false, ["sign"]);
+  const der = b64urlDecode(secret);
+  return crypto.subtle.importKey("pkcs8", der, { name: "Ed25519" }, false, ["sign"]);
 }
 
 /**
  * Authenticate the candidate against the upstream SchoolApp using the
  * schoolapp.js client library, and return the normalized identity object.
  */
-async function authenticateWithSchoolApp(username, password) {
-  const override = globalThis.SCHOOLAPP_API_URL;
+async function authenticateWithSchoolApp(username, password, env) {
+  const override = env.SCHOOLAPP_API_URL;
   const client = override ? new SchoolAppClient(override) : new SchoolAppClient();
 
   const loggedIn = await client.login(username, password);
@@ -83,8 +83,7 @@ async function authenticateWithSchoolApp(username, password) {
     "";
   const firstName = personal["Prénom"] || personal["Nom"]?.split(" ")[0] || "";
   const lastName = personal["Nom"] || "";
-  const year =
-    academic["Niveau Accès"] || academic["Annee Accès"] || "";
+  const year = academic["Niveau Accès"] || academic["Annee Accès"] || "";
 
   // The student's current filière comes from their academic-year results.
   let filiere = "";
@@ -111,8 +110,8 @@ async function authenticateWithSchoolApp(username, password) {
   };
 }
 
-async function signAssertion(identity) {
-  const key = await getSigningKey();
+async function signAssertion(identity, env) {
+  const key = await getSigningKey(env);
   const now = Math.floor(Date.now() / 1000);
 
   const header = { alg: "EdDSA", typ: "JWT" };
@@ -122,8 +121,8 @@ async function signAssertion(identity) {
     lastName: identity.lastName,
     year: identity.year,
     filiere: identity.filiere,
-    iss: ISSUER,
-    aud: AUDIENCE,
+    iss: env.SCHOOLAPP_ISSUER || DEFAULT_ISSUER,
+    aud: env.SCHOOLAPP_AUDIENCE || DEFAULT_AUDIENCE,
     iat: now,
     exp: now + ASSERTION_TTL_SECONDS,
   };
@@ -141,12 +140,12 @@ async function signAssertion(identity) {
   return `${signingInput}.${b64url(signature)}`;
 }
 
-function jsonResponse(body, status) {
+function jsonResponse(body, status, allowedOrigin) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": globalThis.ALLOWED_ORIGIN || "*",
+      "Access-Control-Allow-Origin": allowedOrigin || "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
@@ -154,8 +153,8 @@ function jsonResponse(body, status) {
 }
 
 export default {
-  async fetch(request) {
-    const origin = globalThis.ALLOWED_ORIGIN || "*";
+  async fetch(request, env) {
+    const origin = env.ALLOWED_ORIGIN || "*";
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -169,27 +168,27 @@ export default {
 
     const url = new URL(request.url);
     if (request.method !== "POST" || url.pathname !== "/auth") {
-      return jsonResponse({ error: "Not found" }, 404);
+      return jsonResponse({ error: "Not found" }, 404, origin);
     }
 
     let body;
     try {
       body = await request.json();
     } catch {
-      return jsonResponse({ error: "Invalid JSON body" }, 400);
+      return jsonResponse({ error: "Invalid JSON body" }, 400, origin);
     }
 
     const { username, password } = body || {};
     if (typeof username !== "string" || typeof password !== "string" || !username || !password) {
-      return jsonResponse({ error: "username and password are required" }, 400);
+      return jsonResponse({ error: "username and password are required" }, 400, origin);
     }
 
     try {
-      const identity = await authenticateWithSchoolApp(username, password);
-      const assertion = await signAssertion(identity);
-      return jsonResponse({ assertion }, 200);
+      const identity = await authenticateWithSchoolApp(username, password, env);
+      const assertion = await signAssertion(identity, env);
+      return jsonResponse({ assertion }, 200, origin);
     } catch (err) {
-      return jsonResponse({ error: String(err.message || err) }, 401);
+      return jsonResponse({ error: String(err.message || err) }, 401, origin);
     }
   },
 };

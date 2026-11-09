@@ -32,7 +32,7 @@ assertion.
 ### Key management
 
 - The Worker holds the Ed25519 **private** key as a Cloudflare secret
-  (`SCHOOLAPP_PRIVATE_KEY`, base64url 32-byte seed). It never reaches the
+  (`SCHOOLAPP_PRIVATE_KEY`, base64url PKCS#8 DER). It never reaches the
   browser or the backend.
 - The backend holds only the **public** key (`SCHOOLAPP_PUBLIC_KEY`).
 - Generate both with `python scripts/generate_keys.py`.

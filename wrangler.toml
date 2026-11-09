@@ -14,7 +14,7 @@ SCHOOLAPP_API_URL = ""
 # CORS origin for the FAME frontend.
 ALLOWED_ORIGIN = "*"
 
-# The Ed25519 private signing key (base64url, 32-byte seed) is stored as a
+# The Ed25519 private signing key (base64url PKCS#8 DER) is stored as a
 # Cloudflare SECRET, never in this file:
 #
 #   npx wrangler secret put SCHOOLAPP_PRIVATE_KEY
