@@ -32,7 +32,7 @@ cd backend && uv run python ../scripts/generate_keys.py
 
 ## 3. Deploy the SchoolApp Worker
 
-See `wrangler.toml.example` and `docs/authentication.md`. Deploy with:
+See `wrangler.toml` and `docs/authentication.md`. Deploy with:
 
 ```bash
 wrangler secret put SCHOOLAPP_PRIVATE_KEY

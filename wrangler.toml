@@ -1,0 +1,24 @@
+# FAME SchoolApp authentication Worker configuration.
+name = "fame-schoolapp"
+main = "schoolapp.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Issuer / audience must match the FAME backend (SCHOOLAPP_ISSUER / SCHOOLAPP_AUDIENCE).
+SCHOOLAPP_ISSUER = "fame-schoolapp"
+SCHOOLAPP_AUDIENCE = "fame-api"
+# Upstream SchoolApp authentication API base URL.
+# Set this to your real SchoolApp API before the Worker can authenticate students.
+# The Worker POSTs {username,password} to {URL}/auth/login and expects
+# {name, lastName, year, ensamCode, filiere} in response.
+SCHOOLAPP_API_URL = ""
+# CORS origin for the FAME frontend.
+ALLOWED_ORIGIN = "*"
+
+# The Ed25519 private signing key (base64url, 32-byte seed) is stored as a
+# Cloudflare SECRET, never in this file:
+#
+#   npx wrangler secret put SCHOOLAPP_PRIVATE_KEY
+#
+# Generate it with: cd backend && uv run python ../scripts/generate_keys.py
+# The matching PUBLIC key goes into the backend .env as SCHOOLAPP_PUBLIC_KEY.
