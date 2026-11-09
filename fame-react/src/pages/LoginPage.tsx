@@ -1,37 +1,42 @@
 import { useState, type FormEvent } from 'react'
 import { Icon, Logo, Footer } from '../components/Shared'
+import { api, authenticateWithSchoolApp } from '../api'
+import { setSession, type Session } from '../auth'
 
-export type DemoRole = 'student' | 'organizer'
+type Mode = 'student' | 'organizer'
 
-const DEMO_ACCOUNTS = {
-  student: {
-    email: 'salma.elamrani@edu.umi.ac.ma',
-    password: 'fame2025',
-    role: 'student' as const,
-  },
-  organizer: {
-    email: 'organisateur@edu.umi.ac.ma',
-    password: 'organisateur2025',
-    role: 'organizer' as const,
-  },
-}
-
-export default function LoginPage({ onSuccess }: { onSuccess: (role: DemoRole, email: string) => void }) {
-  const [email, setEmail] = useState(DEMO_ACCOUNTS.student.email)
-  const [password, setPassword] = useState(DEMO_ACCOUNTS.student.password)
+export default function LoginPage({ onSuccess }: { onSuccess: (session: Session) => void }) {
+  const [mode, setMode] = useState<Mode>('student')
+  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
-    const account = Object.values(DEMO_ACCOUNTS).find((item) =>
-      item.email.toLowerCase() === email.trim().toLowerCase() && item.password === password,
-    )
-    if (!account) {
-      setError('Adresse SchoolApp ou mot de passe incorrect. Utilisez les identifiants de démonstration ci-dessous.')
-      return
+    setLoading(true)
+    try {
+      if (mode === 'student') {
+        const assertion = await authenticateWithSchoolApp(email.trim(), password)
+        const result = await api.schoolappLogin(assertion)
+        const name = `${result.candidate.first_name} ${result.candidate.last_name}`.trim()
+        onSuccess(setSession('candidate', result.csrf, name))
+      } else {
+        const result = await api.organizerLogin(username.trim(), password)
+        onSuccess(setSession('organizer', result.csrf, result.username))
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connexion impossible. Vérifiez vos identifiants.')
+    } finally {
+      setLoading(false)
     }
-    onSuccess(account.role, account.email)
+  }
+
+  const switchMode = (next: Mode) => {
+    setMode(next)
+    setError('')
   }
 
   return (
@@ -41,23 +46,47 @@ export default function LoginPage({ onSuccess }: { onSuccess: (role: DemoRole, e
         <section className="signin-card schoolapp-login-card">
           <div className="login-brand"><Logo /></div>
           <span className="eyebrow">ESPACE DE CONNEXION</span>
-          <h1>Connexion SchoolApp</h1>
-          <p className="intro">Connectez-vous avec vos identifiants institutionnels ENSAM / UMI pour accéder à FAME.</p>
+          <h1>{mode === 'student' ? 'Connexion SchoolApp' : 'Espace organisateur'}</h1>
+          <p className="intro">
+            {mode === 'student'
+              ? 'Connectez-vous avec vos identifiants institutionnels ENSAM / UMI pour accéder à FAME.'
+              : 'Réservé à l’équipe organisatrice. Utilisez vos identifiants organisateur.'}
+          </p>
 
           <form className="schoolapp-form" onSubmit={submit}>
-            <label htmlFor="schoolapp-email">Adresse e-mail SchoolApp</label>
-            <div className="schoolapp-input-wrap">
-              <Icon name="mail" size={17} />
-              <input
-                id="schoolapp-email"
-                type="email"
-                autoComplete="username"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="prenom.nom@edu.umi.ac.ma"
-                required
-              />
-            </div>
+            {mode === 'student' ? (
+              <>
+                <label htmlFor="schoolapp-email">Adresse e-mail SchoolApp</label>
+                <div className="schoolapp-input-wrap">
+                  <Icon name="mail" size={17} />
+                  <input
+                    id="schoolapp-email"
+                    type="email"
+                    autoComplete="username"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="prenom.nom@edu.umi.ac.ma"
+                    required
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <label htmlFor="organizer-username">Nom d’utilisateur</label>
+                <div className="schoolapp-input-wrap">
+                  <Icon name="user" size={17} />
+                  <input
+                    id="organizer-username"
+                    type="text"
+                    autoComplete="username"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                    placeholder="votre.nom"
+                    required
+                  />
+                </div>
+              </>
+            )}
             <div className="password-label-row">
               <label htmlFor="schoolapp-password">Mot de passe</label>
             </div>
@@ -69,20 +98,29 @@ export default function LoginPage({ onSuccess }: { onSuccess: (role: DemoRole, e
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Votre mot de passe SchoolApp"
+                placeholder={mode === 'student' ? 'Votre mot de passe SchoolApp' : 'Votre mot de passe'}
                 required
               />
             </div>
             {error && <p className="login-error" role="alert">{error}</p>}
-            <button className="primary schoolapp-submit" type="submit">Se connecter <Icon name="arrow" size={17} /></button>
+            <button className="primary schoolapp-submit" type="submit" disabled={loading}>
+              {loading ? 'Connexion…' : 'Se connecter'} <Icon name="arrow" size={17} />
+            </button>
           </form>
 
-          <div className="login-secure-note"><Icon name="shield" size={15} /> Authentification institutionnelle · Démonstration locale</div>
-          <section className="demo-credentials" aria-label="Identifiants de démonstration">
-            <div className="demo-credentials-title"><span>IDENTIFIANTS DE TEST</span><small>Mode démo</small></div>
-            <div className="demo-account"><b>Étudiant</b><span>{DEMO_ACCOUNTS.student.email}</span><code>{DEMO_ACCOUNTS.student.password}</code></div>
-            <div className="demo-account"><b>Organisateur</b><span>{DEMO_ACCOUNTS.organizer.email}</span><code>{DEMO_ACCOUNTS.organizer.password}</code></div>
-          </section>
+          <div className="login-secure-note"><Icon name="shield" size={15} /> Authentification institutionnelle sécurisée</div>
+
+          <div className="login-mode-switch">
+            {mode === 'student' ? (
+              <button type="button" onClick={() => switchMode('organizer')}>
+                <Icon name="users" size={15} /> Espace organisateur
+              </button>
+            ) : (
+              <button type="button" onClick={() => switchMode('student')}>
+                <Icon name="user" size={15} /> Espace étudiant (SchoolApp)
+              </button>
+            )}
+          </div>
         </section>
       </main>
       <Footer />

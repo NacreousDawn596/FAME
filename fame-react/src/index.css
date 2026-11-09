@@ -784,3 +784,18 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
   .organizer-panel-head h2 { font-size: 15px; }
   .filiere-queue-top > div span { font-size: 9px; }
 }
+
+/* --- FAME wiring additions --- */
+
+.login-mode-switch { margin-top: 18px; text-align: center; }
+.login-mode-switch button { border: 0; background: transparent; color: var(--slate-blue); font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 8px; }
+.login-mode-switch button:hover { background: #f1f5f9; }
+
+.notif-card { border-color: #dbe6f5; }
+
+.ticket-identity { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 18px; color: var(--muted); font-size: 11px; }
+.ticket-identity svg { color: var(--slate-blue); }
+
+.callout-note { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0 0 14px; }
+
+.empty-board { padding: 28px 20px; text-align: center; color: var(--muted); font-size: 12px; }

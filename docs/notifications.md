@@ -15,7 +15,7 @@ still receive notifications.
 
 ## Subscription lifecycle
 
-- The frontend registers a service worker (`src/sw.ts`) and subscribes via the
+- The frontend registers a service worker (`public/sw.js`) and subscribes via the
   Push API using the VAPID public key from `/api/v1/config/public`.
 - Subscriptions are stored in `push_subscriptions` (multiple per candidate).
 - A `404`/`410` from the push service marks the subscription `INVALID` and

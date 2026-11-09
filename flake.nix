@@ -35,7 +35,7 @@
           shellHook = ''
             echo "FAME development shell"
             echo "  backend  -> cd backend && uv sync"
-            echo "  frontend -> cd frontend && npm install"
+            echo "  frontend -> cd fame-react && npm install"
             echo "  run      -> make up"
           '';
         };
@@ -45,9 +45,9 @@
         # and baked into the Docker image at build time.
         packages.frontend = pkgs.buildNpmPackage {
           pname = "fame-frontend";
-          version = "0.1.0";
-          src = ./frontend;
-          npmDepsHash = "sha256-nihEB32LDVIvrxMjfU47TOApFUrdPs3NM5cKv24eCjI=";
+          version = "1.0.0";
+          src = ./fame-react;
+          npmDepsHash = "";
           npmBuild = "build";
           installPhase = ''
             mkdir -p $out

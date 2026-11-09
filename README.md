@@ -26,8 +26,8 @@ complete audit trail.
 
 ## Stack
 
-React · TypeScript · Vite · Tailwind CSS · shadcn/ui · FastAPI · SQLAlchemy 2 ·
-Alembic · PostgreSQL · Redis · ARQ · Web Push (VAPID) · Docker Compose · Nix.
+React · TypeScript · Vite · FastAPI · SQLAlchemy 2 · Alembic · PostgreSQL ·
+Redis · ARQ · Web Push (VAPID) · Docker Compose · Nix.
 
 ## Quick start
 
@@ -47,25 +47,21 @@ cd backend && uv sync --extra dev && uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8000
 
 # Frontend
-cd frontend && npm install && npm run dev
+cd fame-react && npm install && npm run dev
 ```
 
 Run tests:
 
 ```bash
 make test-backend     # pytest (PostgreSQL concurrency tests)
-make test-frontend    # vitest
-
-# End-to-end (requires a running stack + organizer credentials):
-cd frontend && npm install && npx playwright install chromium
-FAME_ORGANIZER_PASSWORD=... npm run test:e2e
+make test-frontend    # TypeScript typecheck
 ```
 
 ## Layout
 
 ```
 backend/    FastAPI app, Alembic migrations, tests
-frontend/   React PWA + organizer dashboard
+fame-react/ React PWA + organizer dashboard + public display
 schoolapp.js Cloudflare Worker (SchoolApp auth)
 vendor/schoolapp/  vendored schoolapp.js client library
 infra/      Dockerfiles + nginx

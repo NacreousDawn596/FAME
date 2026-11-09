@@ -90,8 +90,6 @@ services:
     build:
       context: .
       dockerfile: infra/docker/frontend.Dockerfile
-      args:
-        VITE_SCHOOLAPP_WORKER_URL: ${VITE_SCHOOLAPP_WORKER_URL:-https://schoolapp-worker.example.workers.dev}
     restart: unless-stopped
     depends_on:
       - api

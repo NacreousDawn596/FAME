@@ -1,24 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import LoginPage, { type DemoRole } from './pages/LoginPage'
+import LoginPage from './pages/LoginPage'
 import StudentPage from './pages/StudentPage'
 import OrganizerPage from './pages/OrganizerPage'
 import PublicPage from './pages/PublicPage'
+import { clearSession, readSession, type Session } from './auth'
 
 type Route = 'login' | 'student' | 'organizer' | 'public'
-type Session = { role: DemoRole; email: string }
 
 const routeFromHash = (): Route => {
   const value = window.location.hash.replace(/^#\/?/, '')
   return value === 'student' || value === 'organizer' || value === 'public' ? value : 'login'
-}
-
-const readSession = (): Session | null => {
-  try {
-    const value = window.localStorage.getItem('fame-demo-session')
-    return value ? JSON.parse(value) as Session : null
-  } catch {
-    return null
-  }
 }
 
 export default function App() {
@@ -44,20 +35,19 @@ export default function App() {
     }
   }, [])
 
+  // Guard protected routes.
   useEffect(() => {
-    if (route === 'student' && session?.role !== 'student') navigate('login', true)
+    if (route === 'student' && session?.role !== 'candidate') navigate('login', true)
     if (route === 'organizer' && session?.role !== 'organizer') navigate('login', true)
   }, [route, session, navigate])
 
-  const signIn = (role: DemoRole, email: string) => {
-    const nextSession = { role, email }
-    window.localStorage.setItem('fame-demo-session', JSON.stringify(nextSession))
-    setSession(nextSession)
-    navigate(role === 'organizer' ? 'organizer' : 'student')
+  const signIn = (next: Session) => {
+    setSession(next)
+    navigate(next.role === 'organizer' ? 'organizer' : 'student')
   }
 
   const signOut = () => {
-    window.localStorage.removeItem('fame-demo-session')
+    clearSession()
     setSession(null)
     navigate('login')
   }
@@ -72,8 +62,12 @@ export default function App() {
   return (
     <div className={`app ${route === 'public' ? 'display-mode' : ''}`}>
       {route === 'login' && <LoginPage onSuccess={signIn} />}
-      {route === 'student' && <StudentPage onLogout={signOut} />}
-      {route === 'organizer' && <OrganizerPage onLogout={signOut} onOpenPublic={openPublic} />}
+      {route === 'student' && session?.role === 'candidate' && (
+        <StudentPage session={session} onLogout={signOut} onUnauthorized={signOut} />
+      )}
+      {route === 'organizer' && session?.role === 'organizer' && (
+        <OrganizerPage session={session} onLogout={signOut} onOpenPublic={openPublic} onUnauthorized={signOut} />
+      )}
       {route === 'public' && <PublicPage />}
     </div>
   )

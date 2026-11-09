@@ -16,7 +16,7 @@ backend: ## Run the FastAPI backend locally (uv)
 	cd backend && uv run uvicorn app.main:app --reload --port 8000
 
 frontend: ## Run the Vite dev server
-	cd frontend && npm run dev
+	cd fame-react && npm run dev
 
 worker: ## Run the notification worker locally (ARQ)
 	cd backend && uv run arq app.workers.notifications.WorkerSettings
@@ -38,5 +38,5 @@ test: test-backend test-frontend ## Run all tests
 test-backend: ## Run backend test suite
 	cd backend && uv run pytest
 
-test-frontend: ## Run frontend test suite
-	cd frontend && npm test
+test-frontend: ## Typecheck the frontend
+	cd fame-react && npm run typecheck

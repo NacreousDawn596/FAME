@@ -1,38 +1,62 @@
+import { useEffect, useState } from 'react'
 import { Icon, Logo } from '../components/Shared'
-
-const calls = [
-  { table: 'B · 02', ticket: '#A-024', name: 'Karim A.', track: 'GI' },
-  { table: 'A · 01', ticket: '#A-019', name: 'Mehdi Z.', track: 'GE' },
-  { table: 'C · 05', ticket: '#A-018', name: 'Nora B.', track: 'MSE' },
-]
+import { api } from '../api'
+import type { PublicDisplay } from '../types'
 
 export default function PublicPage() {
+  const [display, setDisplay] = useState<PublicDisplay | null>(null)
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const load = () => api.publicDisplay().then(setDisplay).catch(() => {})
+    load()
+    const interval = setInterval(load, 5000)
+    const clock = setInterval(() => setNow(new Date()), 1000)
+    return () => {
+      clearInterval(interval)
+      clearInterval(clock)
+    }
+  }, [])
+
+  const calls = display?.calls ?? []
+  const next = display?.next ?? []
+
   return (
     <div className="public-display">
       <header className="display-header">
-        <div className="display-brand"><Logo /><div><strong>PFE RECRUITMENT</strong><span>Campagne Safran Morocco</span></div></div>
+        <div className="display-brand"><Logo /><div><strong>PFE RECRUITMENT</strong><span>{display?.company_name ?? 'FAME'}</span></div></div>
         <div className="display-live"><i /> AFFICHAGE EN DIRECT</div>
-        <div className="display-clock"><strong>10:24</strong><span>JEUDI 23 JANVIER 2025</span></div>
+        <div className="display-clock"><strong>{now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</strong><span>{now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}</span></div>
       </header>
       <main className="board">
         <section className="calls-board">
-          <div className="board-heading"><div><span className="pulse-ring"><Icon name="bell" /></span><span><small>APPELS IMMÉDIATS</small><strong>Présentez-vous maintenant</strong></span></div><b>3 APPELS</b></div>
+          <div className="board-heading">
+            <div><span className="pulse-ring"><Icon name="bell" /></span><span><small>APPELS IMMÉDIATS</small><strong>Présentez-vous maintenant</strong></span></div>
+            <b>{calls.length} {calls.length === 1 ? 'APPEL' : 'APPELS'}</b>
+          </div>
           <div className="calls-list">
-            {calls.map((call, index) => <div className={index === 0 ? 'featured' : ''} key={call.ticket}>
-              <div className="call-table"><span>STAND · TABLE</span><strong>{call.table}</strong></div>
-              <div className="call-ticket"><span>TICKET</span><strong>{call.ticket}</strong></div>
-              <div className="call-name"><strong>{call.name}</strong><span><i>{call.track}</i> Dirigez-vous vers le régulateur</span></div>
-              <Icon name="arrow" size={34} />
-            </div>)}
+            {calls.length === 0 && <div className="empty-board">Aucun appel en cours pour le moment.</div>}
+            {calls.map((call, index) => (
+              <div className={index === 0 ? 'featured' : ''} key={`${call.candidate_name}-${index}`}>
+                <div className="call-table"><span>FILIÈRE</span><strong>{call.filiere_code ?? '—'}</strong></div>
+                <div className="call-ticket"><span>APPELÉ</span><strong>Maintenant</strong></div>
+                <div className="call-name"><strong>{call.candidate_name}</strong><span><i>{call.filiere_code ?? ''}</i> Dirigez-vous vers le régulateur</span></div>
+                <Icon name="arrow" size={34} />
+              </div>
+            ))}
           </div>
         </section>
         <section className="next-board">
           <div className="board-heading"><div><span className="approach-icon"><Icon name="clock" /></span><span><small>PROCHAINS CANDIDATS</small><strong>Préparez-vous</strong></span></div><b>EN APPROCHE</b></div>
           <div className="next-grid">
-            {[
-              ['#A-025', 'Lina B.', 'GI'], ['#A-026', 'Omar F.', 'GM'], ['#A-027', 'Sara A.', 'GI'],
-              ['#A-028', 'Youssef L.', 'GE'], ['#A-029', 'Imane K.', 'IInd'], ['#A-030', 'Adam R.', 'MSE'],
-            ].map((person, index) => <div key={person[0]}><span>{String(index + 1).padStart(2, '0')}</span><strong>{person[0]}</strong><p>{person[1]} <i>{person[2]}</i></p></div>)}
+            {next.length === 0 && <div className="empty-board">Aucun candidat en attente.</div>}
+            {next.map((person, index) => (
+              <div key={`${person.candidate_name}-${index}`}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{person.candidate_name}</strong>
+                <p>{person.filiere_code ?? '—'} <i>en attente</i></p>
+              </div>
+            ))}
           </div>
           <div className="prepare-note"><Icon name="id" /><span><strong>Préparez votre carte d’étudiant</strong>Restez à proximité de la zone de dispatch</span></div>
         </section>
@@ -41,4 +65,3 @@ export default function PublicPage() {
     </div>
   )
 }
-

@@ -3,14 +3,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json ./
+COPY fame-react/package.json fame-react/package-lock.json ./
 RUN npm ci
 
-COPY frontend/ ./
-
-ARG VITE_SCHOOLAPP_WORKER_URL
-ENV VITE_SCHOOLAPP_WORKER_URL=${VITE_SCHOOLAPP_WORKER_URL}
-
+COPY fame-react/ ./
 RUN npm run build
 
 FROM nginx:1.27-alpine

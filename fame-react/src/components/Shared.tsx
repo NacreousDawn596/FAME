@@ -66,20 +66,21 @@ export function Logo({ compact = false }: { compact?: boolean }) {
   )
 }
 
-export function AppHeader({ student = false, onLogout, onOpenPublic }: { student?: boolean; onLogout?: () => void; onOpenPublic?: () => void }) {
+export function AppHeader({ student = false, company, userName, userRole, onLogout, onOpenPublic }: { student?: boolean; company?: string; userName?: string; userRole?: string; onLogout?: () => void; onOpenPublic?: () => void }) {
+  const initials = (userName ?? '').split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
   return (
     <header className={`app-header ${student ? 'student-app-header' : ''}`}>
       <div className="header-left">
         <Logo />
         <div className="header-rule" />
         <div className="system-title"><strong>PFE Recruitment</strong><span>Gestion des files d’attente</span></div>
-        <span className="campaign-pill"><i /> Campagne : Safran Morocco</span>
+        {company && <span className="campaign-pill"><i /> Campagne : {company}</span>}
       </div>
       <div className="user-area">
         <button className="icon-button"><Icon name="bell" /><span className="notification-dot" /></button>
         <div className="user-chip">
-          <div className="avatar">{student ? 'SE' : 'YA'}</div>
-          <div><strong>{student ? 'Salma El Amrani' : 'Yassine Aït Omar'}</strong><span>{student ? 'Étudiante 5ème année' : 'Comité / Régulateur'}</span></div>
+          <div className="avatar">{initials || (student ? 'SE' : 'YA')}</div>
+          <div><strong>{userName || (student ? 'Étudiant' : 'Organisateur')}</strong><span>{userRole || (student ? 'Étudiant·e' : 'Comité / Régulateur')}</span></div>
         </div>
         <>{onOpenPublic && <button className="public-open-button" onClick={onOpenPublic}><Icon name="arrow" /> <span>Écran public</span></button>}<button className="logout" onClick={onLogout}><Icon name="door" /> <span>Déconnexion</span></button></>
       </div>
@@ -91,10 +92,10 @@ export function Footer() {
   return <footer><span>© 2025 ENSAM Meknès — Université Moulay Ismaïl</span><a href="mailto:support@ensam-umi.ac.ma"><Icon name="headset" /> Assistance technique</a></footer>
 }
 
-export function MobileShell({ children, step: _step, onLogout }: { children: ReactNode; step: string; onLogout?: () => void }) {
+export function MobileShell({ children, step: _step, company, userName, onLogout }: { children: ReactNode; step: string; company?: string; userName?: string; onLogout?: () => void }) {
   return (
     <div className="student-page">
-      <AppHeader student onLogout={onLogout} />
+      <AppHeader student company={company} userName={userName} userRole="Étudiant·e" onLogout={onLogout} />
       <main className="mobile-stage">
         <div className="student-content-wrap">{children}</div>
       </main>

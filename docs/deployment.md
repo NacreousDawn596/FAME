@@ -81,6 +81,6 @@ push subscription.
 
 - `flake.nix` / `flake.lock` pin the toolchain (`nix develop`).
 - `backend/uv.lock` pins every Python dependency.
-- `frontend/package-lock.json` pins every Node dependency.
+- `fame-react/package-lock.json` pins every Node dependency.
 - `nix build .#frontend` builds the frontend reproducibly.
 - Docker images install from the lockfiles at build time — no runtime downloads.
