@@ -33,7 +33,7 @@ Alembic · PostgreSQL · Redis · ARQ · Web Push (VAPID) · Docker Compose · N
 
 ```bash
 cp .env.example .env        # fill in secrets
-python3 scripts/generate_keys.py
+cd backend && uv run python ../scripts/generate_keys.py
 docker compose up -d --build
 ```
 
@@ -55,6 +55,10 @@ Run tests:
 ```bash
 make test-backend     # pytest (PostgreSQL concurrency tests)
 make test-frontend    # vitest
+
+# End-to-end (requires a running stack + organizer credentials):
+cd frontend && npm install && npx playwright install chromium
+FAME_ORGANIZER_PASSWORD=... npm run test:e2e
 ```
 
 ## Layout

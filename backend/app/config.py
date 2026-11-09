@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # --- Session / security ---
     session_secret: str = "insecure-dev-secret"
-    allowed_origins: list[str] = ["http://localhost:5173", "http://localhost:8080"]
+    allowed_origins: str = "http://localhost:5173,http://localhost:8080"
 
     # --- VAPID ---
     vapid_public_key: str = ""
@@ -56,12 +56,14 @@ class Settings(BaseSettings):
     @classmethod
     def _split_origins(cls, v: object) -> object:
         if isinstance(v, str):
-            return [o.strip() for o in v.split(",") if o.strip()]
+            return v
+        if isinstance(v, (list, tuple)):
+            return ",".join(v)
         return v
 
     @property
     def allowed_origin_list(self) -> list[str]:
-        return self.allowed_origins
+        return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
     @property
     def is_production(self) -> bool:

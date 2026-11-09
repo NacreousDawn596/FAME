@@ -28,7 +28,7 @@ migrate: ## Apply database migrations
 	cd backend && uv run alembic upgrade head
 
 keys: ## Generate SchoolApp + VAPID keypairs and print env snippets
-	python3 scripts/generate_keys.py
+	cd backend && uv run python ../scripts/generate_keys.py
 
 organizer: ## Create an organizer account (interactive)
 	cd backend && uv run python ../scripts/create_organizer.py

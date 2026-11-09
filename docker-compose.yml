@@ -76,6 +76,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://fame:change-me-postgres@postgres:5432/fame}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
     depends_on:
+      api:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:

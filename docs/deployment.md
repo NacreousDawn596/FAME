@@ -24,7 +24,7 @@ Fill in every value. The important ones:
 ## 2. Generate keys
 
 ```bash
-python3 scripts/generate_keys.py
+cd backend && uv run python ../scripts/generate_keys.py
 ```
 
 - Put the `SCHOOLAPP_PRIVATE_KEY` output in the Cloudflare Worker as a secret.

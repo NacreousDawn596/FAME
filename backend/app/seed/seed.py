@@ -48,6 +48,9 @@ async def seed_organizers(session: AsyncSession) -> list[str]:
 
     Returns the list of (email, temporary_password) for newly-created accounts.
     """
+    import logging
+
+    logger = logging.getLogger("fame")
     created: list[str] = []
     emails = [e.strip() for e in settings.organizer_initial_emails.split(",") if e.strip()]
     for email in emails:
@@ -60,6 +63,12 @@ async def seed_organizers(session: AsyncSession) -> list[str]:
         username = email.split("@")[0]
         session.add(
             Organizer(username=username, email=email, password_hash=hash_password(password))
+        )
+        logger.info(
+            "[NEW ORGANIZER] created username=%s email=%s temporary_password=%s",
+            username,
+            email,
+            password,
         )
         created.append(f"{email} -> temporary password: {password}")
     await session.commit()
