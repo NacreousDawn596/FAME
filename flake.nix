@@ -23,7 +23,6 @@
             # Toolchain (dependencies themselves are pinned via uv.lock / package-lock.json)
             pkgs.uv
             pkgs.nodejs_22
-            pkgs.pnpm
             python
             # Local infrastructure / testing
             pkgs.docker
@@ -36,8 +35,8 @@
           shellHook = ''
             echo "FAME development shell"
             echo "  backend  -> cd backend && uv sync"
-            echo "  frontend -> cd frontend && pnpm install"
-            echo "  run      -> make dev"
+            echo "  frontend -> cd frontend && npm install"
+            echo "  run      -> make up"
           '';
         };
 

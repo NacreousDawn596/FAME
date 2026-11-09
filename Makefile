@@ -12,14 +12,14 @@ down: ## Stop the stack
 logs: ## Tail all service logs
 	docker compose logs -f
 
-dev: ## Run backend + frontend locally for development
-	@echo "Run 'make backend' and 'make frontend' in separate terminals."
-
 backend: ## Run the FastAPI backend locally (uv)
 	cd backend && uv run uvicorn app.main:app --reload --port 8000
 
 frontend: ## Run the Vite dev server
-	cd frontend && pnpm dev
+	cd frontend && npm run dev
+
+worker: ## Run the notification worker locally (ARQ)
+	cd backend && uv run arq app.workers.notifications.WorkerSettings
 
 seed: ## Seed the filiere catalog + bootstrap organizers
 	cd backend && uv run python -m app.seed.seed
@@ -31,12 +31,12 @@ keys: ## Generate SchoolApp + VAPID keypairs and print env snippets
 	python3 scripts/generate_keys.py
 
 organizer: ## Create an organizer account (interactive)
-	cd backend && uv run python -m scripts.create_organizer
+	cd backend && uv run python ../scripts/create_organizer.py
 
-test: test-backend ## Run all tests
+test: test-backend test-frontend ## Run all tests
 
 test-backend: ## Run backend test suite
 	cd backend && uv run pytest
 
 test-frontend: ## Run frontend test suite
-	cd frontend && pnpm test
+	cd frontend && npm test
