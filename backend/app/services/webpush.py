@@ -30,6 +30,7 @@ async def send_push_async(
             data=data,
             vapid_private_key=settings.vapid_private_key,
             vapid_claims={"sub": settings.vapid_subject},
+            ttl=settings.push_ttl_seconds,
         )
 
     try:
