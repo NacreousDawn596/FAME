@@ -34,6 +34,7 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
   const [loading, setLoading] = useState(true)
   const [notifState, setNotifState] = useState<'unsupported' | 'granted' | 'denied' | 'idle'>('idle')
   const [notifying, setNotifying] = useState(false)
+  const [notifError, setNotifError] = useState('')
   const [confirmLeave, setConfirmLeave] = useState(false)
 
   const load = async () => {
@@ -51,10 +52,12 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
     const close = connectWebSocket('/api/v1/ws/candidate', (msg) => {
       if (msg.type === 'queue_changed' || msg.type === 'status_changed') load()
     })
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
       setNotifState('unsupported')
     } else if (Notification.permission === 'granted') {
       setNotifState('granted')
+      // Permission already granted — ensure a subscription is registered.
+      enableNotifications()
     } else if (Notification.permission === 'denied') {
       setNotifState('denied')
     }
@@ -64,13 +67,24 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
 
   const enableNotifications = async () => {
     setNotifying(true)
+    setNotifError('')
     try {
+      if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        setNotifState('unsupported')
+        setNotifError('Ce navigateur ne prend pas en charge les notifications push.')
+        return
+      }
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
         setNotifState('denied')
+        setNotifError('Autorisation refusée par le navigateur.')
         return
       }
       const config = await api.config()
+      if (!config.vapid_public_key) {
+        setNotifError('Clé VAPID non configurée sur le serveur.')
+        return
+      }
       const registration = await navigator.serviceWorker.ready
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -81,8 +95,8 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
         session.csrf,
       )
       setNotifState('granted')
-    } catch {
-      setNotifState('denied')
+    } catch (err) {
+      setNotifError(err instanceof Error ? err.message : 'Échec de l’activation des notifications.')
     } finally {
       setNotifying(false)
     }
@@ -133,6 +147,7 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
         <NotificationCard
           state={notifState}
           notifying={notifying}
+          error={notifError}
           onEnable={enableNotifications}
         />
         <PwaInstallCard />
@@ -186,7 +201,7 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
   )
 }
 
-function NotificationCard({ state, notifying, onEnable }: { state: 'unsupported' | 'granted' | 'denied' | 'idle'; notifying: boolean; onEnable: () => void }) {
+function NotificationCard({ state, notifying, error, onEnable }: { state: 'unsupported' | 'granted' | 'denied' | 'idle'; notifying: boolean; error?: string; onEnable: () => void }) {
   if (state === 'unsupported') return null
   return (
     <section className="pwa-install-card notif-card">
@@ -197,9 +212,10 @@ function NotificationCard({ state, notifying, onEnable }: { state: 'unsupported'
       </div>
       {state !== 'granted' && (
         <button className="pwa-install-button" onClick={onEnable} disabled={notifying || state === 'denied'}>
-          <Icon name="bell" size={14} /> {state === 'denied' ? 'Bloqué' : 'Activer'}
+          <Icon name="bell" size={14} /> {state === 'denied' ? 'Bloqué' : notifying ? '…' : 'Activer'}
         </button>
       )}
+      {error && <p className="login-error">{error}</p>}
     </section>
   )
 }
