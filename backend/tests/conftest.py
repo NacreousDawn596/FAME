@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import os
 
-os.environ["DATABASE_URL"] = "postgresql+asyncpg://fame:fame@localhost:55432/fame_test"
-os.environ["REDIS_URL"] = "redis://localhost:56379/1"
-os.environ["SESSION_SECRET"] = "test-secret-that-is-at-least-32-bytes-long-1234567890"
-os.environ["SCHOOLAPP_PUBLIC_KEY"] = ""
-os.environ["ENVIRONMENT"] = "test"
+# Local-dev defaults; CI overrides these via environment variables.
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://fame:fame@localhost:55432/fame_test"
+)
+os.environ.setdefault("REDIS_URL", "redis://localhost:56379/1")
+os.environ.setdefault("SESSION_SECRET", "test-secret-that-is-at-least-32-bytes-long-1234567890")
+os.environ.setdefault("SCHOOLAPP_PUBLIC_KEY", "")
+os.environ.setdefault("ENVIRONMENT", "test")
 
 import base64  # noqa: E402
 
