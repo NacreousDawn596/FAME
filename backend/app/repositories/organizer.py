@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import (
     AttributionEvent,
     Candidate,
+    Company,
     Filiere,
     NotificationEvent,
     Organizer,
@@ -349,3 +350,70 @@ async def notification_page(
         for e, ensam in rows
     ]
     return items, total
+
+
+async def public_display(
+    session: AsyncSession, calls_limit: int = 3, next_limit: int = 8
+) -> dict:
+    """Data for the unauthenticated public call display.
+
+    Returns recently-called candidates (`calls`) and the front-of-queue
+    candidates (`next`, position 1 of each non-empty filière).
+    """
+    company = (
+        await session.execute(select(Company).order_by(Company.id).limit(1))
+    ).scalar_one_or_none()
+
+    call_rows = (
+        await session.execute(
+            select(
+                AttributionEvent.created_at,
+                Candidate.first_name,
+                Candidate.last_name,
+                Candidate.filiere_code,
+            )
+            .join(Candidate, Candidate.id == AttributionEvent.candidate_id)
+            .where(AttributionEvent.new_state == QueueStatus.ATTRIBUTED.value)
+            .order_by(AttributionEvent.created_at.desc())
+            .limit(calls_limit)
+        )
+    ).all()
+    calls = [
+        {
+            "candidate_name": f"{first} {last}".strip(),
+            "filiere_code": filiere,
+            "called_at": created_at.isoformat() if created_at else None,
+        }
+        for created_at, first, last, filiere in call_rows
+    ]
+
+    pos_cte = _waiting_positions_cte()
+    next_rows = (
+        await session.execute(
+            select(
+                QueueEntry.filiere_code,
+                Candidate.first_name,
+                Candidate.last_name,
+                pos_cte.c.position,
+            )
+            .join(Candidate, Candidate.id == QueueEntry.candidate_id)
+            .join(pos_cte, pos_cte.c.candidate_id == QueueEntry.candidate_id)
+            .where(pos_cte.c.position == 1)
+            .order_by(QueueEntry.filiere_code)
+            .limit(next_limit)
+        )
+    ).all()
+    next_candidates = [
+        {
+            "position": position,
+            "candidate_name": f"{first} {last}".strip(),
+            "filiere_code": filiere,
+        }
+        for filiere, first, last, position in next_rows
+    ]
+
+    return {
+        "company_name": company.name if company else "FAME Recruitment",
+        "calls": calls,
+        "next": next_candidates,
+    }

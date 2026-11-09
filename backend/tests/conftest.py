@@ -100,3 +100,16 @@ def schoolapp_assertion_factory(schoolapp_keypair):
         return f"{header}.{payload_b64}.{b64url(signature)}"
 
     return make
+
+
+@pytest.fixture
+async def client():
+    """ASGI test client with the app lifespan run."""
+    import httpx
+
+    from app.main import app
+
+    async with app.router.lifespan_context(app):
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+            yield c

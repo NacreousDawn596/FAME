@@ -14,7 +14,7 @@ from app.schemas.candidate import (
 )
 from app.security.csrf import candidate_csrf
 from app.security.deps import CurrentCandidate, SessionDep
-from app.services.queue import get_candidate_status
+from app.services.queue import get_candidate_status, withdraw_candidate
 
 router = APIRouter(prefix="/candidate", tags=["candidate"])
 
@@ -91,5 +91,14 @@ async def remove_push_subscription(
     if sub is None or sub.candidate_id != candidate.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Subscription not found")
     await session.delete(sub)
+    await session.commit()
+    return {"ok": True}
+
+
+@router.post("/withdraw", dependencies=[Depends(candidate_csrf)])
+async def withdraw(session: SessionDep, candidate: CurrentCandidate):
+    withdrew = await withdraw_candidate(session, candidate.id)
+    if not withdrew:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Not currently waiting")
     await session.commit()
     return {"ok": True}

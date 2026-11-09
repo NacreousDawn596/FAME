@@ -40,6 +40,19 @@ async def get_active_queue_entry(
     return result.scalar_one_or_none()
 
 
+async def withdraw_candidate(session: AsyncSession, candidate_id: int) -> bool:
+    """Mark a candidate's queue entry as WITHDRAWN (voluntary self-removal).
+
+    Returns True if the candidate was withdrawn, False if not eligible.
+    """
+    entry = await get_active_queue_entry(session, candidate_id)
+    if entry is None or entry.status != QueueStatus.WAITING:
+        return False
+    entry.status = QueueStatus.WITHDRAWN
+    entry.version = (entry.version or 0) + 1
+    return True
+
+
 async def register_candidate(
     session: AsyncSession,
     identity,

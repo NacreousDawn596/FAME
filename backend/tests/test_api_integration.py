@@ -2,23 +2,10 @@
 
 from __future__ import annotations
 
-import httpx
-import pytest
-
 from app.config import settings
 from app.database import SessionFactory
 from app.models import Organizer
 from app.security.passwords import hash_password
-
-
-@pytest.fixture
-async def client():
-    from app.main import app
-
-    async with app.router.lifespan_context(app):
-        transport = httpx.ASGITransport(app=app)
-        async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
-            yield c
 
 
 async def _seed_organizer():
