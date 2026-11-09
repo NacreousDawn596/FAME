@@ -20,6 +20,8 @@ dist-ssr/
 *.local
 .vite/
 *.tsbuildinfo
+vite.config.js
+vite.config.d.ts
 test-results/
 playwright-report/
 
@@ -45,3 +47,6 @@ result-*
 *.key
 keys/
 vapid_keys/
+
+# Local deployment scripts with secrets
+start.sh
