@@ -80,6 +80,10 @@ class FifoRequest(BaseModel):
     filiere_code: str | None = None
 
 
+class NotificationTestRequest(BaseModel):
+    candidate_id: int
+
+
 class ReasonRequest(BaseModel):
     reason: str | None = None
 

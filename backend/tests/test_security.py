@@ -22,10 +22,11 @@ def test_valid_assertion(monkeypatch, schoolapp_assertion_factory, schoolapp_key
 
 def test_wrong_key_rejected(monkeypatch, schoolapp_assertion_factory, schoolapp_keypair):
     _set_public_key(monkeypatch, schoolapp_keypair["public_b64"])
-    # Sign with a different key: tamper by flipping a signature char.
+    # Tamper with a middle signature character (unambiguously changes bytes).
     token = schoolapp_assertion_factory()
     header, payload, sig = token.split(".")
-    tampered = sig[:-1] + ("A" if sig[-1] != "A" else "B")
+    mid = len(sig) // 2
+    tampered = sig[:mid] + ("A" if sig[mid] != "A" else "B") + sig[mid + 1 :]
     with pytest.raises(TokenError):
         verify_schoolapp_assertion(f"{header}.{payload}.{tampered}")
 

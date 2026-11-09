@@ -86,6 +86,10 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
         return
       }
       const registration = await navigator.serviceWorker.ready
+      // Drop any stale subscription first so FCM issues a fresh token — this
+      // recovers from the common "subscribed but never delivered" state.
+      const existing = await registration.pushManager.getSubscription()
+      if (existing) await existing.unsubscribe()
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(config.vapid_public_key),

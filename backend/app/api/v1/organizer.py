@@ -22,6 +22,7 @@ from app.schemas.organizer import (
     HistoryResponse,
     ManualAttributionRequest,
     NotificationListResponse,
+    NotificationTestRequest,
     ReasonRequest,
 )
 from app.security.csrf import organizer_csrf
@@ -392,3 +393,46 @@ async def notifications(
 ):
     items, total = await repo.notification_page(session, max(1, page), min(200, max(1, page_size)))
     return NotificationListResponse(items=items, total=total, page=page, page_size=page_size)
+
+
+@router.post("/notifications/test", dependencies=[Depends(organizer_csrf)])
+async def test_notification(
+    body: NotificationTestRequest,
+    session: SessionDep,
+    organizer: CurrentOrganizer,
+):
+    """Send a test push to a candidate (diagnostics)."""
+    from app.models import PushSubscription
+
+    candidate = await session.get(Candidate, body.candidate_id)
+    if candidate is None:
+        raise HTTPException(404, "Candidate not found")
+
+    subs = (
+        await session.execute(
+            select(PushSubscription).where(PushSubscription.candidate_id == candidate.id)
+        )
+    ).scalars().all()
+    if not subs:
+        return {"ok": False, "message": "Candidate has no push subscription", "subscriptions": 0}
+
+    payload = notif.build_payload(NotificationEventType.ATTRIBUTED, candidate, None, candidate.filiere_code)
+    event = await notif.schedule_notification(
+        session,
+        candidate.id,
+        NotificationEventType.ATTRIBUTED,
+        payload,
+        f"test:{candidate.id}:{datetime.now(UTC).timestamp():.0f}",
+    )
+    await session.commit()
+
+    event_id = event.id if event else None
+    if event_id:
+        await enqueue_job("deliver_notification", event_id)
+
+    return {
+        "ok": event_id is not None,
+        "message": "Test notification scheduled" if event_id else "Duplicate test notification skipped",
+        "subscriptions": len(subs),
+        "event_id": event_id,
+    }
