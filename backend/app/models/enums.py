@@ -5,14 +5,14 @@ from __future__ import annotations
 import enum
 
 
-class QueueStatus(str, enum.Enum):
+class QueueStatus(enum.StrEnum):
     WAITING = "WAITING"
     ATTRIBUTED = "ATTRIBUTED"
     CANCELLED = "CANCELLED"
     WITHDRAWN = "WITHDRAWN"
 
 
-class AttributionOperation(str, enum.Enum):
+class AttributionOperation(enum.StrEnum):
     FIFO = "FIFO"
     MANUAL = "MANUAL"
     UNDO = "UNDO"
@@ -22,7 +22,7 @@ class AttributionOperation(str, enum.Enum):
     REASSIGN = "REASSIGN"
 
 
-class NotificationEventType(str, enum.Enum):
+class NotificationEventType(enum.StrEnum):
     POSITION_CHANGED = "POSITION_CHANGED"
     APPROACHING = "APPROACHING"
     URGENT = "URGENT"
@@ -33,14 +33,14 @@ class NotificationEventType(str, enum.Enum):
     CANCELLED = "CANCELLED"
 
 
-class NotificationStatus(str, enum.Enum):
+class NotificationStatus(enum.StrEnum):
     PENDING = "PENDING"
     SENT = "SENT"
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
 
 
-class DeliveryStatus(str, enum.Enum):
+class DeliveryStatus(enum.StrEnum):
     PENDING = "PENDING"
     SENT = "SENT"
     FAILED = "FAILED"

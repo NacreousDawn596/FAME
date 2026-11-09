@@ -8,7 +8,7 @@ immutable `AttributionEvent`. Concurrency safety for FIFO is provided by
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,7 +42,7 @@ class AttributionOutcome:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _apply_status(entry: QueueEntry, new_status: QueueStatus, now: datetime) -> None:

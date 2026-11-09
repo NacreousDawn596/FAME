@@ -2,7 +2,6 @@
 
 from types import SimpleNamespace
 
-import pytest
 from sqlalchemy import func, select
 
 from app.database import SessionFactory

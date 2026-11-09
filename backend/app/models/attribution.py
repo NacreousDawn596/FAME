@@ -9,10 +9,10 @@ from sqlalchemy import BigInteger, DateTime, Enum, ForeignKey, Integer, String, 
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
-from app.models.enums import AttributionOperation, QueueStatus
+from app.models.enums import AttributionOperation
 
 if TYPE_CHECKING:
-    from app.models.organizer import Organizer
+    pass
 
 
 class AttributionEvent(Base):

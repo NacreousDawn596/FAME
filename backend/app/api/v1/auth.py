@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-
 from fastapi import APIRouter, HTTPException, Response, status
 
 from app.config import settings
-from app.models.enums import QueueStatus
 from app.schemas.auth import SchoolAppAuthRequest
 from app.schemas.candidate import CandidateProfile
 from app.security.deps import CANDIDATE_COOKIE, CurrentCandidate, SessionDep

@@ -12,7 +12,6 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -32,7 +31,7 @@ class Filiere(Base):
     departement: Mapped[str] = mapped_column(String(128), nullable=False)
     accreditation: Mapped[str] = mapped_column(String(16), nullable=False)
 
-    queue_entries: Mapped[list["QueueEntry"]] = relationship(back_populates="filiere")
+    queue_entries: Mapped[list[QueueEntry]] = relationship(back_populates="filiere")
 
 
 class Candidate(Base):
@@ -53,8 +52,8 @@ class Candidate(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    queue_entries: Mapped[list["QueueEntry"]] = relationship(back_populates="candidate")
-    push_subscriptions: Mapped[list["PushSubscription"]] = relationship(
+    queue_entries: Mapped[list[QueueEntry]] = relationship(back_populates="candidate")
+    push_subscriptions: Mapped[list[PushSubscription]] = relationship(
         back_populates="candidate"
     )
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
@@ -66,7 +66,7 @@ async def organizer_ws(websocket: WebSocket) -> None:
             select(OrganizerSession).where(OrganizerSession.token_hash == token_hash)
         )
         org_session = result.scalar_one_or_none()
-        if org_session is None or org_session.expires_at <= datetime.now(timezone.utc):
+        if org_session is None or org_session.expires_at <= datetime.now(UTC):
             await websocket.close(code=4401)
             return
 

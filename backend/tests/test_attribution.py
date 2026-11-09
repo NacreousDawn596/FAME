@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import select
 
 from app.database import SessionFactory
-from app.models import AttributionEvent, Candidate, Organizer, QueueEntry
+from app.models import Candidate, Organizer, QueueEntry
 from app.models.enums import QueueStatus
 from app.security.passwords import hash_password
 from app.services import attribution as attr
@@ -87,7 +87,7 @@ async def test_undo_attribution_restores_position():
     org_id = await _make_organizer()
     async with SessionFactory() as s:
         await _register(s, ["E1", "E2", "E3"])
-        outcome = await attr.attribute_next(s, org_id, "GI-ILSI")
+        await attr.attribute_next(s, org_id, "GI-ILSI")
         await s.commit()
         c1, _ = await _entry(s, "E1")
         await attr.undo_attribution(s, org_id, c1.id)
@@ -151,9 +151,7 @@ async def test_concurrent_fifo_no_double_attribution():
     assert len(codes) == len(set(codes))
 
     async with SessionFactory() as s:
-        waiting = (
-            await s.execute(select(QueueEntry).where(QueueEntry.status == QueueStatus.WAITING))
-        ).scalars().all()
+        await s.execute(select(QueueEntry).where(QueueEntry.status == QueueStatus.WAITING))
         attributed_count = (
             await s.execute(select(QueueEntry).where(QueueEntry.status == QueueStatus.ATTRIBUTED))
         ).scalars().all()

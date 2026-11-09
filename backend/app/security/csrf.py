@@ -8,11 +8,8 @@ from typing import Annotated
 from fastapi import Cookie, Depends, Header, HTTPException, status
 from sqlalchemy import select
 
-from app.database import get_session
 from app.models import OrganizerSession
 from app.security.deps import (
-    CANDIDATE_COOKIE,
-    ORGANIZER_COOKIE,
     SessionDep,
 )
 from app.security.tokens import TokenError, decode_candidate_session

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Candidate, Filiere, QueueEntry
+from app.models import Candidate, QueueEntry
 from app.models.enums import QueueStatus
 from app.services.filiere import get_filiere_name, resolve_filiere
 

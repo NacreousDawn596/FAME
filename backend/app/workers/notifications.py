@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from arq.connections import RedisSettings
 from sqlalchemy import select
@@ -63,7 +63,7 @@ async def deliver_notification(ctx, notification_event_id: int) -> None:
 
         if all_ok:
             event.status = NotificationStatus.SENT.value
-            event.sent_at = datetime.now(timezone.utc)
+            event.sent_at = datetime.now(UTC)
         await session.commit()
 
 

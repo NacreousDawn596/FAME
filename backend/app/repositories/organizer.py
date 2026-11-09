@@ -177,7 +177,6 @@ async def filiere_queues(session: AsyncSession) -> list[dict]:
         entry[r.status.value.lower()] = r.cnt
 
     first_waiting = {}
-    pos_cte = _waiting_positions_cte()
     first_rows = (
         await session.execute(
             select(

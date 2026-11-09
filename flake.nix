@@ -47,7 +47,7 @@
           pname = "fame-frontend";
           version = "0.1.0";
           src = ./frontend;
-          npmDepsHash = "";
+          npmDepsHash = "sha256-nihEB32LDVIvrxMjfU47TOApFUrdPs3NM5cKv24eCjI=";
           npmBuild = "build";
           installPhase = ''
             mkdir -p $out

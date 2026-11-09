@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import AttributionEvent, Candidate, Filiere, Organizer, OrganizerSession, QueueEntry
+from app.models import Candidate, Filiere, Organizer, OrganizerSession
 from app.models.enums import NotificationEventType
 from app.repositories import organizer as repo
 from app.schemas.auth import OrganizerLoginRequest, OrganizerLoginResponse
@@ -16,16 +16,16 @@ from app.schemas.organizer import (
     AttributionResult,
     CandidateListResponse,
     DashboardResponse,
+    FifoRequest,
     FiliereQueueDetail,
     FiliereQueueOut,
-    FifoRequest,
     HistoryResponse,
     ManualAttributionRequest,
     NotificationListResponse,
     ReasonRequest,
 )
 from app.security.csrf import organizer_csrf
-from app.security.deps import CurrentOrganizer, ORGANIZER_COOKIE, SessionDep
+from app.security.deps import ORGANIZER_COOKIE, CurrentOrganizer, SessionDep
 from app.security.passwords import verify_password
 from app.security.rate_limit import rate_limit_login
 from app.security.tokens import create_csrf_token, create_organizer_token
@@ -33,7 +33,6 @@ from app.services import attribution as attr
 from app.services import notifications as notif
 from app.services.attribution import AttributionError, AttributionOutcome
 from app.services.jobs import enqueue_job
-from app.services.queue import get_candidate_status
 from app.websocket.manager import manager
 
 router = APIRouter(prefix="/organizer", tags=["organizer"])
@@ -78,7 +77,7 @@ async def login(body: OrganizerLoginRequest, response: Response, session: Sessio
             organizer_id=organizer.id,
             token_hash=_hash_token(token),
             csrf_token=csrf,
-            expires_at=datetime.now(timezone.utc) + timedelta(hours=ORGANIZER_SESSION_HOURS),
+            expires_at=datetime.now(UTC) + timedelta(hours=ORGANIZER_SESSION_HOURS),
         )
     )
     await session.commit()

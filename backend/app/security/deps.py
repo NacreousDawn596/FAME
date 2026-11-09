@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import Cookie, Depends, HTTPException, status
@@ -64,7 +64,7 @@ async def get_current_organizer(
     org_session = result.scalar_one_or_none()
     if org_session is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid session")
-    if org_session.expires_at <= datetime.now(timezone.utc):
+    if org_session.expires_at <= datetime.now(UTC):
         await session.delete(org_session)
         await session.commit()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired")

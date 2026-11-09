@@ -13,6 +13,7 @@ from app.models.organizer import Organizer, OrganizerSession
 
 __all__ = [
     "AttributionEvent",
+    "Base",
     "Candidate",
     "Company",
     "Filiere",

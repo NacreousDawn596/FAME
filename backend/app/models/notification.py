@@ -64,7 +64,7 @@ class NotificationEvent(Base):
     )
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    deliveries: Mapped[list["NotificationDelivery"]] = relationship(
+    deliveries: Mapped[list[NotificationDelivery]] = relationship(
         back_populates="event", cascade="all, delete-orphan"
     )
 

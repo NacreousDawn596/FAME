@@ -15,8 +15,6 @@ import base64  # noqa: E402
 import pytest  # noqa: E402
 from cryptography.hazmat.primitives import serialization  # noqa: E402
 from cryptography.hazmat.primitives.asymmetric import ed25519  # noqa: E402
-from sqlalchemy import text  # noqa: E402
-from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
 
 from app.database import Base, SessionFactory  # noqa: E402
 from app.seed.filieres import FILIERES  # noqa: E402

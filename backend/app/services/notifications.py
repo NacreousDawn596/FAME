@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.models import Candidate, NotificationEvent, QueueEntry
 from app.models.enums import NotificationEventType, NotificationStatus, QueueStatus
-from app.services.queue import get_queue_position
 
 DEDUP_WINDOW_MINUTES = 30
 
