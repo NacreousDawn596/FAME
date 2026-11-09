@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,7 @@ from app.config import settings
 from app.models import Candidate, NotificationEvent, QueueEntry
 from app.models.enums import NotificationEventType, NotificationStatus, QueueStatus
 
-DEDUP_WINDOW_MINUTES = 30
+DEDUP_WINDOW_SECONDS = 60
 
 
 def build_payload(
@@ -57,6 +58,7 @@ async def schedule_notification(
     dedup_key: str,
 ) -> NotificationEvent | None:
     """Create a notification event if not recently deduplicated. Returns event or None."""
+    cutoff = datetime.now(UTC) - timedelta(seconds=DEDUP_WINDOW_SECONDS)
     existing = (
         await session.execute(
             select(NotificationEvent).where(
@@ -64,6 +66,7 @@ async def schedule_notification(
                 NotificationEvent.status.in_(
                     [NotificationStatus.PENDING.value, NotificationStatus.SENT.value]
                 ),
+                NotificationEvent.created_at >= cutoff,
             )
         )
     ).scalars().first()
