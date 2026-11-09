@@ -1,0 +1,92 @@
+"""FAME backend application configuration."""
+
+from __future__ import annotations
+
+import base64
+from functools import lru_cache
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    # --- Environment ---
+    environment: str = "development"
+
+    # --- Infrastructure ---
+    database_url: str = "postgresql+asyncpg://fame:fame@localhost:5432/fame"
+    redis_url: str = "redis://localhost:6379/0"
+
+    # --- SchoolApp ---
+    schoolapp_worker_url: str = ""
+    schoolapp_public_key: str = ""  # base64-encoded Ed25519 public key
+    schoolapp_issuer: str = "fame-schoolapp"
+    schoolapp_audience: str = "fame-api"
+    schoolapp_assertion_max_age_seconds: int = 300
+
+    # --- Organizer ---
+    organizer_initial_emails: str = ""  # comma-separated
+
+    # --- Session / security ---
+    session_secret: str = "insecure-dev-secret"
+    allowed_origins: list[str] = ["http://localhost:5173", "http://localhost:8080"]
+
+    # --- VAPID ---
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_subject: str = "mailto:admin@fame.local"
+
+    # --- URLs ---
+    frontend_url: str = "http://localhost:5173"
+    api_url: str = "http://localhost:8000"
+
+    # --- Queue ---
+    default_company_name: str = "FAME Recruitment"
+    notification_approaching_threshold: int = 5
+    notification_urgent_threshold: int = 2
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def _split_origins(cls, v: object) -> object:
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
+
+    @property
+    def allowed_origin_list(self) -> list[str]:
+        return self.allowed_origins
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.lower() == "production"
+
+    @property
+    def schoolapp_public_key_bytes(self) -> bytes:
+        if not self.schoolapp_public_key:
+            raise RuntimeError("SCHOOLAPP_PUBLIC_KEY is not configured")
+        return base64.urlsafe_b64decode(
+            self.schoolapp_public_key + "=" * (-len(self.schoolapp_public_key) % 4)
+        )
+
+    @property
+    def vapid_private_key_bytes(self) -> bytes:
+        if not self.vapid_private_key:
+            raise RuntimeError("VAPID_PRIVATE_KEY is not configured")
+        return base64.urlsafe_b64decode(
+            self.vapid_private_key + "=" * (-len(self.vapid_private_key) % 4)
+        )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()
