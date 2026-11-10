@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import UTC, datetime
 
 from arq.connections import RedisSettings
 from sqlalchemy import select
+
+logging.basicConfig(level=logging.INFO)
 
 from app.config import settings
 from app.database import SessionFactory
