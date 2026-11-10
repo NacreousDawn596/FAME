@@ -9,8 +9,6 @@ from datetime import UTC, datetime
 from arq.connections import RedisSettings
 from sqlalchemy import select
 
-logging.basicConfig(level=logging.INFO)
-
 from app.config import settings
 from app.database import SessionFactory
 from app.models import (
@@ -22,6 +20,8 @@ from app.models import (
 from app.models.enums import DeliveryStatus, NotificationStatus
 from app.services import channels
 from app.services.webpush import PermanentPushError, send_push_async
+
+logging.basicConfig(level=logging.INFO)
 
 MAX_ATTEMPTS = 5
 
