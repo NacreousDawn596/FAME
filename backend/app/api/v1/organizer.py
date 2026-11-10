@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.models import Candidate, Filiere, Organizer, OrganizerSession
-from app.models.enums import NotificationEventType
+from app.models.enums import NotificationEventType, QueueStatus
 from app.repositories import organizer as repo
 from app.schemas.auth import OrganizerLoginRequest, OrganizerLoginResponse
 from app.schemas.organizer import (
@@ -32,8 +32,10 @@ from app.security.rate_limit import rate_limit_login
 from app.security.tokens import create_csrf_token, create_organizer_token
 from app.services import attribution as attr
 from app.services import notifications as notif
+from app.services.activity import log_activity
 from app.services.attribution import AttributionError, AttributionOutcome
 from app.services.jobs import enqueue_job
+from app.services.queue import get_active_queue_entry
 from app.websocket.manager import manager
 
 router = APIRouter(prefix="/organizer", tags=["organizer"])
@@ -80,6 +82,13 @@ async def login(body: OrganizerLoginRequest, response: Response, session: Sessio
             csrf_token=csrf,
             expires_at=datetime.now(UTC) + timedelta(hours=ORGANIZER_SESSION_HOURS),
         )
+    )
+    await log_activity(
+        session,
+        actor_type="organizer",
+        actor_id=organizer.id,
+        action="organizer.login",
+        details={"username": organizer.username, "email": organizer.email},
     )
     await session.commit()
 
@@ -234,6 +243,7 @@ async def _fifo(
         event_ids.append(eid)
     event_ids += await notif.schedule_threshold_notifications(session, filiere_code)
 
+    await _log_outcome(session, organizer, "organizer.attribute_fifo", outcome)
     await session.commit()
     await _post_commit_effects(outcome, event_ids)
     return _result(outcome)
@@ -261,6 +271,7 @@ async def attribute_manual(
         event_ids.append(eid)
     event_ids += await notif.schedule_threshold_notifications(session, outcome.affected_filiere)
 
+    await _log_outcome(session, organizer, "organizer.attribute_manual", outcome)
     await session.commit()
     await _post_commit_effects(outcome, event_ids)
     return _result(outcome)
@@ -331,6 +342,56 @@ async def restore_candidate(candidate_id: int, session: SessionDep, organizer: C
     return _result(outcome)
 
 
+@router.post("/candidates/{candidate_id}/arrive", response_model=AttributionResult, dependencies=[Depends(organizer_csrf)])
+async def arrive_candidate(candidate_id: int, session: SessionDep, organizer: CurrentOrganizer):
+    try:
+        outcome = await attr.complete_candidate(session, organizer.id, candidate_id)
+    except AttributionError as exc:
+        raise HTTPException(exc.status_code, exc.detail) from exc
+
+    await _log_outcome(session, organizer, "organizer.arrive", outcome)
+    await session.commit()
+    await _post_commit_effects(outcome, [])
+    return _result(outcome)
+
+
+@router.post("/candidates/{candidate_id}/renotify", dependencies=[Depends(organizer_csrf)])
+async def renotify_candidate(candidate_id: int, session: SessionDep, organizer: CurrentOrganizer):
+    candidate = await session.get(Candidate, candidate_id)
+    if candidate is None:
+        raise HTTPException(404, "Candidate not found")
+    entry = await get_active_queue_entry(session, candidate_id)
+    if entry is None or entry.status != QueueStatus.ATTRIBUTED:
+        raise HTTPException(409, "Candidate is not currently summoned")
+
+    payload = notif.build_payload(NotificationEventType.ATTRIBUTED, candidate, None, entry.filiere_code)
+    import time as _time
+
+    event = await notif.schedule_notification(
+        session,
+        candidate.id,
+        NotificationEventType.ATTRIBUTED,
+        payload,
+        f"renotify:{candidate.id}:{int(_time.time())}",
+    )
+    await log_activity(
+        session,
+        actor_type="organizer",
+        actor_id=organizer.id,
+        action="organizer.renotify",
+        details={"candidate_id": candidate_id, "ensam_code": candidate.ensam_code},
+    )
+    await session.commit()
+    if event is not None:
+        await enqueue_job("deliver_notification", event.id)
+    return {"ok": True, "event_id": event.id if event else None}
+
+
+@router.get("/summoned")
+async def summoned(session: SessionDep, organizer: CurrentOrganizer):
+    return await repo.summoned_candidates(session)
+
+
 @router.post("/operations/undo-last", response_model=AttributionResult, dependencies=[Depends(organizer_csrf)])
 async def undo_last(session: SessionDep, organizer: CurrentOrganizer):
     try:
@@ -374,6 +435,23 @@ def _result(outcome: AttributionOutcome) -> AttributionResult:
         regulator=outcome.regulator,
         room=outcome.room,
         timestamp=outcome.timestamp,
+    )
+
+
+async def _log_outcome(session, organizer, action: str, outcome: AttributionOutcome) -> None:
+    await log_activity(
+        session,
+        actor_type="organizer",
+        actor_id=organizer.id,
+        action=action,
+        details={
+            "candidate_id": outcome.candidate_id,
+            "ensam_code": outcome.ensam_code,
+            "new_status": outcome.new_status,
+            "filiere": outcome.filiere_code,
+            "regulator": outcome.regulator,
+            "room": outcome.room,
+        },
     )
 
 

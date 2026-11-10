@@ -335,6 +335,34 @@ async def restore_candidate(
     return _outcome(event, candidate, entry, None)
 
 
+async def complete_candidate(
+    session: AsyncSession, organizer_id: int, candidate_id: int
+) -> AttributionOutcome:
+    """Confirm a summoned candidate has arrived (ATTRIBUTED -> COMPLETED)."""
+    now = _now()
+    candidate = await _load_candidate(session, candidate_id)
+    entry = await get_active_queue_entry(session, candidate_id)
+    if entry is None or entry.status != QueueStatus.ATTRIBUTED:
+        raise AttributionError(409, "Candidate is not summoned")
+
+    _apply_status(entry, QueueStatus.COMPLETED, now)
+    event = await _record(
+        session,
+        candidate_id=candidate.id,
+        organizer_id=organizer_id,
+        operation=AttributionOperation.COMPLETE,
+        previous_state=QueueStatus.ATTRIBUTED,
+        new_state=QueueStatus.COMPLETED,
+        previous_filiere=entry.filiere_code,
+        new_filiere=entry.filiere_code,
+        previous_queue_position=None,
+        new_queue_position=None,
+        regulator=entry.regulator,
+        room=entry.room,
+    )
+    return _outcome(event, candidate, entry, None)
+
+
 async def undo_last(session: AsyncSession, organizer_id: int) -> AttributionOutcome:
     """Reverse the most recent eligible (non-UNDO) organizer action."""
     now = _now()

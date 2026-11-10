@@ -14,6 +14,7 @@ from app.security.tokens import (
     create_csrf_token,
     verify_schoolapp_assertion,
 )
+from app.services.activity import log_activity
 from app.services.queue import register_candidate
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -47,6 +48,20 @@ async def schoolapp_auth(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Assertion missing identity")
 
     candidate = await register_candidate(session, identity)
+    await log_activity(
+        session,
+        actor_type="candidate",
+        actor_id=candidate.id,
+        action="candidate.login",
+        details={
+            "ensam_code": candidate.ensam_code,
+            "name": f"{candidate.first_name} {candidate.last_name}".strip(),
+            "email": candidate.email,
+            "phone": candidate.phone,
+            "filiere": candidate.filiere_code,
+            "year": candidate.year,
+        },
+    )
     await session.commit()
 
     csrf = create_csrf_token()

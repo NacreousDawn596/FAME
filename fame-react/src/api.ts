@@ -6,6 +6,7 @@ import type {
   FiliereQueue,
   PublicConfig,
   PublicDisplay,
+  SummonedCandidate,
 } from './types'
 
 export class ApiError extends Error {
@@ -100,6 +101,22 @@ export const api = {
     }),
   undoLast: (csrf: string) =>
     request<AttributionResult>('/api/v1/organizer/operations/undo-last', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf },
+    }),
+  undoAttribution: (candidateId: number, csrf: string) =>
+    request<AttributionResult>(`/api/v1/organizer/attributions/${candidateId}/undo`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf },
+    }),
+  summoned: () => request<SummonedCandidate[]>('/api/v1/organizer/summoned'),
+  arrive: (candidateId: number, csrf: string) =>
+    request<AttributionResult>(`/api/v1/organizer/candidates/${candidateId}/arrive`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf },
+    }),
+  renotify: (candidateId: number, csrf: string) =>
+    request(`/api/v1/organizer/candidates/${candidateId}/renotify`, {
       method: 'POST',
       headers: { 'X-CSRF-Token': csrf },
     }),

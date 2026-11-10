@@ -69,6 +69,10 @@ class Settings(BaseSettings):
     regulators: str = ""
     rooms: str = ""
 
+    # --- Activity log ---
+    # Path of the append-only activity log file (candidates + organizer actions).
+    activity_log_path: str = "logs/activity.log"
+
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def _split_origins(cls, v: object) -> object:

@@ -256,6 +256,39 @@ async def filiere_queue_detail(session: AsyncSession, code: str | None) -> list[
     ]
 
 
+async def summoned_candidates(session: AsyncSession) -> list[dict]:
+    """Candidates currently summoned (ATTRIBUTED), for the organizer wait panel."""
+    rows = (
+        await session.execute(
+            select(
+                QueueEntry.candidate_id,
+                QueueEntry.attributed_at,
+                QueueEntry.regulator,
+                QueueEntry.room,
+                QueueEntry.filiere_code,
+                Candidate.ensam_code,
+                Candidate.first_name,
+                Candidate.last_name,
+            )
+            .join(Candidate, Candidate.id == QueueEntry.candidate_id)
+            .where(QueueEntry.status == QueueStatus.ATTRIBUTED)
+            .order_by(QueueEntry.attributed_at)
+        )
+    ).all()
+    return [
+        {
+            "candidate_id": r.candidate_id,
+            "ensam_code": r.ensam_code,
+            "name": f"{r.first_name} {r.last_name}".strip(),
+            "filiere_code": r.filiere_code,
+            "regulator": r.regulator,
+            "room": r.room,
+            "attributed_at": r.attributed_at.isoformat() if r.attributed_at else None,
+        }
+        for r in rows
+    ]
+
+
 async def recent_history(session: AsyncSession, limit: int = 20) -> list[dict]:
     rows = (
         await session.execute(

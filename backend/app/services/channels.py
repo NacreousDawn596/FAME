@@ -102,10 +102,18 @@ async def send_whatsapp_notification(
     message = f"FAME — {candidate_name} ({ensam_code}), {_friendly_text(event_type)}."
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            await client.post(
+            resp = await client.post(
                 f"{settings.whatsapp_bridge_url}/send",
                 json={"number": number, "message": message},
             )
-        logger.info("[whatsapp] sent for %s to %s", ensam_code, number)
+        body = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+        if resp.status_code >= 400 or body.get("ok") is False:
+            logger.warning(
+                "[whatsapp] rejected for %s: %s",
+                ensam_code,
+                body.get("error", "unknown"),
+            )
+        else:
+            logger.info("[whatsapp] sent for %s to %s", ensam_code, number)
     except Exception as exc:  # noqa: BLE001 - best-effort channel
         logger.warning("[whatsapp] failed for %s: %s", ensam_code, exc)

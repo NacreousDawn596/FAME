@@ -424,6 +424,7 @@ fame/
 
 | Document | Sujet |
 |---|---|
+| [`PROJECT.md`](PROJECT.md) | Spécification technique complète & guide pour agents de code |
 | [`docs/architecture.md`](docs/architecture.md) | Composants et choix techniques |
 | [`docs/authentication.md`](docs/authentication.md) | Flux d'authentification et frontières de confiance |
 | [`docs/database.md`](docs/database.md) | Modèle de données et cohérence |

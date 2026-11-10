@@ -10,6 +10,7 @@ class QueueStatus(enum.StrEnum):
     ATTRIBUTED = "ATTRIBUTED"
     CANCELLED = "CANCELLED"
     WITHDRAWN = "WITHDRAWN"
+    COMPLETED = "COMPLETED"
 
 
 class AttributionOperation(enum.StrEnum):
@@ -20,6 +21,7 @@ class AttributionOperation(enum.StrEnum):
     CANCEL = "CANCEL"
     RESTORE = "RESTORE"
     REASSIGN = "REASSIGN"
+    COMPLETE = "COMPLETE"
 
 
 class NotificationEventType(enum.StrEnum):

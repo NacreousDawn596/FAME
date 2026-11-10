@@ -15,6 +15,7 @@ from app.schemas.candidate import (
 )
 from app.security.csrf import candidate_csrf
 from app.security.deps import CurrentCandidate, SessionDep
+from app.services.activity import log_activity
 from app.services.queue import get_candidate_status, withdraw_candidate
 
 router = APIRouter(prefix="/candidate", tags=["candidate"])
@@ -103,6 +104,13 @@ async def withdraw(session: SessionDep, candidate: CurrentCandidate):
     withdrew = await withdraw_candidate(session, candidate.id)
     if not withdrew:
         raise HTTPException(status.HTTP_409_CONFLICT, "Not currently waiting")
+    await log_activity(
+        session,
+        actor_type="candidate",
+        actor_id=candidate.id,
+        action="candidate.withdraw",
+        details={"ensam_code": candidate.ensam_code},
+    )
     await session.commit()
     return {"ok": True}
 
@@ -117,6 +125,13 @@ async def update_contact(
         candidate.email = body.email.strip() or None
     if body.phone is not None:
         candidate.phone = body.phone.strip() or None
+    await log_activity(
+        session,
+        actor_type="candidate",
+        actor_id=candidate.id,
+        action="candidate.confirm_contact",
+        details={"email": candidate.email, "phone": candidate.phone},
+    )
     await session.commit()
     return {
         "ok": True,

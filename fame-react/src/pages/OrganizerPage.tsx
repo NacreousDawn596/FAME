@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { AppHeader, Icon } from '../components/Shared'
 import { api, ApiError } from '../api'
 import { connectWebSocket } from '../ws'
-import type { CandidateRow, DashboardResponse, FiliereQueue, PublicConfig } from '../types'
+import type { CandidateRow, DashboardResponse, FiliereQueue, PublicConfig, SummonedCandidate } from '../types'
 import type { Session } from '../auth'
+
+/** Time window (seconds) the organizer gives a summoned candidate to arrive. */
+const SUMMON_SECONDS = 300
 
 interface Props {
   session: Session
@@ -22,18 +25,22 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<CandidateRow[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [summoned, setSummoned] = useState<SummonedCandidate[]>([])
+  const [tick, setTick] = useState(0)
   const [notice, setNotice] = useState('')
   const [lastAction, setLastAction] = useState<{ name: string; code: string } | null>(null)
 
   const load = async () => {
     try {
-      const [dashboard, queueList, config] = await Promise.all([
+      const [dashboard, queueList, config, summonedList] = await Promise.all([
         api.dashboard(),
         api.queues(),
         api.config(),
+        api.summoned(),
       ])
       setStats(dashboard.stats)
       setQueues(queueList)
+      setSummoned(summonedList)
       setRegulators(config.regulators ?? [])
       setRooms(config.rooms ?? [])
       // Default selection: first regulator + its paired room.
@@ -47,6 +54,12 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
       if (err instanceof ApiError && err.status === 401) onUnauthorized()
     }
   }
+
+  // Re-render every second so the countdown timers stay live.
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   // When the regulator changes, auto-select its paired room (by index).
   const selectRegulator = (name: string) => {
@@ -117,6 +130,41 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
     }
   }
 
+  const arrive = async (candidateId: number, name: string) => {
+    try {
+      await api.arrive(candidateId, session.csrf)
+      setNotice(`${name} est arrivé(e).`)
+      await load()
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'Arrivée impossible.')
+    }
+  }
+
+  const renotify = async (candidateId: number, name: string) => {
+    try {
+      await api.renotify(candidateId, session.csrf)
+      setNotice(`Notification renvoyée à ${name}.`)
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'Renvoi impossible.')
+    }
+  }
+
+  const cancelSummon = async (candidateId: number, name: string) => {
+    try {
+      await api.undoAttribution(candidateId, session.csrf)
+      setNotice(`${name} a été renvoyé(e) en fin de file.`)
+      await load()
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'Annulation impossible.')
+    }
+  }
+
+  const remainingSeconds = (attributedAt: string | null): number => {
+    if (!attributedAt) return 0
+    const elapsed = (Date.now() - new Date(attributedAt).getTime()) / 1000
+    return Math.max(0, Math.round(SUMMON_SECONDS - elapsed))
+  }
+
   const waitingTotal = stats?.waiting ?? queues.reduce((sum, q) => sum + q.waiting, 0)
   const attributedTotal = stats?.attributed ?? queues.reduce((sum, q) => sum + q.attributed, 0)
   const totalCandidates = stats?.total_candidates ?? waitingTotal + attributedTotal
@@ -161,6 +209,52 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
         </section>
 
         {notice && <div className="organizer-notice"><Icon name="check" />{notice}<button onClick={() => setNotice('')} aria-label="Fermer">×</button></div>}
+
+        {summoned.length > 0 && (
+          <section className="organizer-panel summoned-panel">
+            <div className="organizer-panel-head">
+              <div>
+                <span className="eyebrow">EN ATTENTE D'ARRIVÉE</span>
+                <h2>Candidats convoqués ({summoned.length})</h2>
+              </div>
+              <span className="summoned-live-pill"><i /> Décompte en direct</span>
+            </div>
+            <div className="summoned-list">
+              {summoned.map((c) => {
+                const left = remainingSeconds(c.attributed_at)
+                const expired = left === 0
+                return (
+                  <article className={`summoned-card ${expired ? 'expired' : ''}`} key={c.candidate_id}>
+                    <div className="summoned-top">
+                      <div className="avatar">{c.name.slice(0, 2)}</div>
+                      <div className="summoned-info">
+                        <strong>{c.name}</strong>
+                        <span>{c.ensam_code} · {c.filiere_code ?? 'Sans filière'}</span>
+                        <small>Affecté(e) à : {c.regulator ?? '—'} ({c.room ?? '—'})</small>
+                      </div>
+                      <div className={`summoned-timer ${expired ? 'timer-expired' : ''}`}>
+                        <Icon name="clock" size={14} />
+                        <strong>{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</strong>
+                        <small>{expired ? 'Délai dépassé' : 'restant'}</small>
+                      </div>
+                    </div>
+                    <div className="summoned-actions">
+                      <button className="primary arrive-button" onClick={() => arrive(c.candidate_id, c.name)}>
+                        <Icon name="check" size={14} /> Arrivé(e)
+                      </button>
+                      <button className="renotify-button" onClick={() => renotify(c.candidate_id, c.name)}>
+                        <Icon name="bell" size={14} /> Relancer
+                      </button>
+                      <button className="cancel-summon-button" onClick={() => cancelSummon(c.candidate_id, c.name)}>
+                        <Icon name="refresh" size={14} /> Renvoyer en fin de file
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <div className="organizer-grid">
           <section className="organizer-panel filiere-panel">

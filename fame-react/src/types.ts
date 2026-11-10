@@ -101,6 +101,16 @@ export interface AttributionResult {
   timestamp: string
 }
 
+export interface SummonedCandidate {
+  candidate_id: number
+  ensam_code: string
+  name: string
+  filiere_code: string | null
+  regulator: string | null
+  room: string | null
+  attributed_at: string | null
+}
+
 export interface PublicDisplay {
   company_name: string
   calls: { candidate_name: string; filiere_code: string | null; called_at: string | null }[]

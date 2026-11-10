@@ -805,3 +805,30 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
 .assignment-row { display: flex; gap: 18px; flex-wrap: wrap; }
 .assignment-row label { display: flex; flex-direction: column; gap: 6px; font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; flex: 1; min-width: 180px; }
 .assignment-row select { height: 38px; border: 1px solid var(--border); border-radius: 9px; background: white; padding: 0 12px; color: var(--navy); font-size: 13px; text-transform: none; letter-spacing: normal; }
+
+/* --- Summoned candidates panel --- */
+.summoned-panel { margin-bottom: 18px; border-color: #fde68a; background: #fffdf5; }
+.summoned-live-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; background: #fef3c7; color: #b45309; font-size: 10px; font-weight: 700; }
+.summoned-live-pill i { width: 6px; height: 6px; border-radius: 50%; background: #d97706; animation: pulse 2s infinite; }
+.summoned-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.summoned-card { padding: 14px; border: 1px solid #fef08a; border-radius: 10px; background: white; display: flex; flex-direction: column; gap: 12px; transition: border-color .2s; }
+.summoned-card.expired { border-color: #fca5a5; background: #fffbfb; }
+.summoned-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.summoned-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 200px; }
+.summoned-info strong { color: var(--navy); font-size: 13px; }
+.summoned-info span { color: var(--muted); font-size: 11px; }
+.summoned-info small { color: #64748b; font-size: 10px; font-weight: 500; }
+.summoned-timer { display: flex; flex-direction: column; align-items: flex-end; padding: 6px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.summoned-timer strong { font-size: 16px; color: var(--navy); font-variant-numeric: tabular-nums; }
+.summoned-timer small { font-size: 9px; color: var(--muted); }
+.summoned-timer.timer-expired { background: #fee2e2; border-color: #fecaca; }
+.summoned-timer.timer-expired strong { color: #dc2626; }
+.summoned-timer.timer-expired small { color: #b91c1c; }
+.summoned-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+.summoned-actions button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 11px; font-weight: 600; border-radius: 7px; border: 1px solid transparent; cursor: pointer; }
+.arrive-button { background: #059669; color: white; }
+.arrive-button:hover { background: #047857; }
+.renotify-button { background: #f1f5f9; color: var(--navy); border-color: #cbd5e1; }
+.renotify-button:hover { background: #e2e8f0; }
+.cancel-summon-button { background: #fff1f2; color: #be123c; border-color: #fecdd3; margin-left: auto; }
+.cancel-summon-button:hover { background: #ffe4e6; }
