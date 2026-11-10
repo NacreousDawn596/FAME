@@ -84,24 +84,13 @@ async function authenticateWithSchoolApp(username, password, env) {
     "";
   const firstName = personal["Prénom"] || personal["Nom"]?.split(" ")[0] || "";
   const lastName = personal["Nom"] || "";
-  const year = academic["Niveau Accès"] || academic["Annee Accès"] || "";
+  const year = administrative["Niveau"] || academic["Niveau Accès"] || academic["Annee Accès"] || "";
+  const filiere = administrative["Filière"] || administrative["Filiere"] || "";
 
   // Contact info: email is the login address, phone comes from the profile.
   const email = username || "";
   const phone =
     contact["Téléphone"] || contact["Telephone"] || contact["Tél"] || contact["phone"] || "";
-
-  // The student's current filière comes from their academic-year results.
-  let filiere = "";
-  try {
-    const annees = await client.getAnnee();
-    if (Array.isArray(annees) && annees.length > 0) {
-      const current = annees[annees.length - 1];
-      filiere = current.Filiere || current.filiere || "";
-    }
-  } catch (err) {
-    console.warn("[FAME] Could not resolve filiere:", err?.message);
-  }
 
   if (!ensamCode) {
     throw new Error("SchoolApp profile is missing the student code");
