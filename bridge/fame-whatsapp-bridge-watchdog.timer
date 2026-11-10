@@ -1,0 +1,10 @@
+[Unit]
+Description=Watchdog timer for the FAME WhatsApp bridge
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

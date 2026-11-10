@@ -53,8 +53,15 @@ app.post('/send', async (req, res) => {
   }
 });
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, ready: client.info !== undefined });
+app.get('/health', async (_req, res) => {
+  let ready = false;
+  try {
+    const state = await client.getState();
+    ready = state === 'CONNECTED' && client.info !== undefined;
+  } catch {
+    ready = false;
+  }
+  res.json({ ok: true, ready });
 });
 
 // Render the current WhatsApp Web QR as a clean HTML page (scannable by phone).

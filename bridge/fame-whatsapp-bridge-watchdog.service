@@ -1,0 +1,6 @@
+[Unit]
+Description=Watchdog: restart the FAME WhatsApp bridge if unhealthy
+
+[Service]
+Type=oneshot
+ExecStart=%h/Documents/fame/bridge/watchdog.sh
