@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     # --- VAPID ---
     vapid_public_key: str = ""
     vapid_private_key: str = ""
-    vapid_subject: str = "mailto:admin@fame.local"
+    vapid_subject: str = "mailto:fame@gadzarts.xyz"
     # Web Push message TTL (seconds). FCM drops messages with TTL=0 if the
     # device is momentarily unreachable (doze/background); a short TTL lets the
     # push service queue and deliver it when the device reconnects.
