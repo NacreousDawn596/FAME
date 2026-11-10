@@ -737,12 +737,19 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
 .candidate-search { display: block; color: #475569; font-size: 10px; }
 .candidate-search input { min-height: 43px; margin-top: 7px; font-size: 11px; }
 .manual-results { min-height: 76px; max-height: 245px; overflow: auto; margin: 10px 0; }
-.manual-result { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 7px; border: 1px solid transparent; border-radius: 8px; background: transparent; text-align: left; }
+.manual-result { width: 100%; border: 1px solid transparent; border-radius: 8px; background: transparent; margin-bottom: 2px; }
 .manual-result:hover, .manual-result.selected { border-color: #cbd8ea; background: #f3f6fb; }
-.manual-result > span { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.manual-result-row { display: flex; align-items: center; gap: 6px; padding-right: 7px; }
+.manual-result-main { flex: 1; display: flex; align-items: center; gap: 9px; padding: 9px 7px; border: 0; background: transparent; text-align: left; cursor: pointer; min-width: 0; }
+.manual-result-main > span { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
 .manual-result strong { color: var(--navy); font-size: 11px; }
 .manual-result small { color: var(--muted); font-size: 9px; }
-.manual-result > i { display: grid; place-items: center; color: var(--slate-blue); font-style: normal; }
+.manual-result-main > i { display: grid; place-items: center; color: var(--slate-blue); font-style: normal; flex: none; }
+.profile-expand { width: 22px; height: 22px; flex: none; border: 1px solid #cbd8ea; border-radius: 6px; background: white; color: var(--slate-blue); font-size: 14px; line-height: 1; font-weight: 700; cursor: pointer; }
+.profile-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; padding: 4px 12px 12px 46px; }
+.profile-detail > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.profile-detail small { color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .04em; }
+.profile-detail strong { color: var(--navy); font-size: 11px; word-break: break-word; }
 .search-empty { margin: 12px 0; color: #8895a7; font-size: 10px; line-height: 1.55; }
 .manual-attribute { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 13px; font-size: 10px; }
 .last-action { display: flex; align-items: center; gap: 10px; margin: 3px 0 13px; padding: 11px; border-radius: 9px; background: #f8fafc; }

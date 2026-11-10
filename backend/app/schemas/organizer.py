@@ -30,6 +30,8 @@ class CandidateRow(BaseModel):
     first_name: str
     last_name: str
     year: str | None
+    email: str | None
+    phone: str | None
     filiere_code: str | None
     status: str
     position: int | None

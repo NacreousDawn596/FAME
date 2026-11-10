@@ -25,6 +25,7 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<CandidateRow[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
   const [summoned, setSummoned] = useState<SummonedCandidate[]>([])
   const [tick, setTick] = useState(0)
   const [notice, setNotice] = useState('')
@@ -290,11 +291,32 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
               <label className="candidate-search">Nom, code ENSAM ou filière<input value={search} onChange={(event) => { setSearch(event.target.value); setSelectedId(null) }} placeholder="Ex. Karim Amrani" /></label>
               <div className="manual-results">
                 {search.trim() ? results.map((candidate) => (
-                  <button className={`manual-result ${selectedId === candidate.id ? 'selected' : ''}`} key={candidate.id} onClick={() => setSelectedId(candidate.id)}>
-                    <div className="avatar small">{(candidate.first_name[0] ?? '') + (candidate.last_name[0] ?? '')}</div>
-                    <span><strong>{candidate.first_name} {candidate.last_name}</strong><small>{candidate.ensam_code} · {candidate.filiere_code}</small></span>
-                    <i>{selectedId === candidate.id ? <Icon name="check" size={15} /> : <Icon name="chevron" size={15} />}</i>
-                  </button>
+                  <div className={`manual-result ${selectedId === candidate.id ? 'selected' : ''}`} key={candidate.id}>
+                    <div className="manual-result-row">
+                      <button className="manual-result-main" onClick={() => setSelectedId(candidate.id)}>
+                        <div className="avatar small">{(candidate.first_name[0] ?? '') + (candidate.last_name[0] ?? '')}</div>
+                        <span><strong>{candidate.first_name} {candidate.last_name}</strong><small>{candidate.ensam_code} · {candidate.filiere_code}</small></span>
+                        <i>{selectedId === candidate.id ? <Icon name="check" size={15} /> : <Icon name="chevron" size={15} />}</i>
+                      </button>
+                      <button
+                        className="profile-expand"
+                        onClick={() => setExpandedId((current) => (current === candidate.id ? null : candidate.id))}
+                        aria-label="Afficher le profil"
+                      >
+                        {expandedId === candidate.id ? '−' : '+'}
+                      </button>
+                    </div>
+                    {expandedId === candidate.id && (
+                      <div className="profile-detail">
+                        <div><small>Nom complet</small><strong>{candidate.first_name} {candidate.last_name}</strong></div>
+                        <div><small>Code ENSAM</small><strong>{candidate.ensam_code}</strong></div>
+                        <div><small>Année</small><strong>{candidate.year ?? '—'}</strong></div>
+                        <div><small>Filière</small><strong>{candidate.filiere_code ?? '—'}</strong></div>
+                        <div><small>Email</small><strong>{candidate.email ?? '—'}</strong></div>
+                        <div><small>Téléphone</small><strong>{candidate.phone ?? '—'}</strong></div>
+                      </div>
+                    )}
+                  </div>
                 )) : <p className="search-empty">Saisissez un nom ou un code pour afficher les candidats en attente.</p>}
                 {search.trim() && results.length === 0 && <p className="search-empty">Aucun candidat en attente ne correspond à cette recherche.</p>}
               </div>
