@@ -20,6 +20,8 @@ def build_payload(
     candidate: Candidate,
     position: int | None,
     filiere_code: str | None,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> dict:
     title = "FAME"
     body = "Your queue status has changed."
@@ -46,6 +48,8 @@ def build_payload(
             "eventType": event_type.value,
             "position": position,
             "filiere": filiere_code,
+            "regulator": regulator,
+            "room": room,
         },
     }
 

@@ -203,11 +203,13 @@ async def _schedule_candidate_notification(
     position: int | None,
     filiere_code: str | None,
     dedup_key: str,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> int | None:
     candidate = await session.get(Candidate, candidate_id)
     if candidate is None:
         return None
-    payload = notif.build_payload(event_type, candidate, position, filiere_code)
+    payload = notif.build_payload(event_type, candidate, position, filiere_code, regulator, room)
     event = await notif.schedule_notification(session, candidate_id, event_type, payload, dedup_key)
     return event.id if event else None
 
@@ -238,6 +240,8 @@ async def _fifo(
     eid = await _schedule_candidate_notification(
         session, outcome.candidate_id, NotificationEventType.ATTRIBUTED, None, filiere_code,
         f"cand:{outcome.candidate_id}:attributed",
+        regulator=outcome.regulator,
+        room=outcome.room,
     )
     if eid:
         event_ids.append(eid)
@@ -266,6 +270,8 @@ async def attribute_manual(
     eid = await _schedule_candidate_notification(
         session, outcome.candidate_id, NotificationEventType.ATTRIBUTED, None, outcome.affected_filiere,
         f"cand:{outcome.candidate_id}:attributed",
+        regulator=outcome.regulator,
+        room=outcome.room,
     )
     if eid:
         event_ids.append(eid)
@@ -364,7 +370,9 @@ async def renotify_candidate(candidate_id: int, session: SessionDep, organizer: 
     if entry is None or entry.status != QueueStatus.ATTRIBUTED:
         raise HTTPException(409, "Candidate is not currently summoned")
 
-    payload = notif.build_payload(NotificationEventType.ATTRIBUTED, candidate, None, entry.filiere_code)
+    payload = notif.build_payload(
+        NotificationEventType.ATTRIBUTED, candidate, None, entry.filiere_code, entry.regulator, entry.room
+    )
     import time as _time
 
     event = await notif.schedule_notification(

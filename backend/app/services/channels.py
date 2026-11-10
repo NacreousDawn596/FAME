@@ -40,6 +40,8 @@ async def send_email_notification(
     candidate_email: str | None,
     candidate_phone: str | None,
     event_type: str,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> None:
     """Send an email via FormSubmit to the configured notification inbox."""
     if not settings.email_notifications_enabled:
@@ -49,6 +51,8 @@ async def send_email_notification(
         f"Candidat : {candidate_name}\n"
         f"Code ENSAM : {ensam_code}\n"
         f"Événement : {_friendly_text(event_type)}\n"
+        f"Régulateur : {regulator or '—'}\n"
+        f"Salle : {room or '—'}\n"
         f"Email : {candidate_email or '—'}\n"
         f"Téléphone : {candidate_phone or '—'}\n"
     )
@@ -91,6 +95,8 @@ async def send_whatsapp_notification(
     ensam_code: str,
     candidate_phone: str | None,
     event_type: str,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> None:
     """Send a WhatsApp message via the local whatsapp-web.js bridge."""
     if not settings.whatsapp_notifications_enabled:
@@ -99,7 +105,8 @@ async def send_whatsapp_notification(
     if not number:
         logger.info("[whatsapp] no phone for %s, skipped", ensam_code)
         return
-    message = f"FAME — {candidate_name} ({ensam_code}), {_friendly_text(event_type)}."
+    dispatch = f" Régulateur : {regulator} · Salle : {room}." if (regulator or room) else ""
+    message = f"FAME — {candidate_name} ({ensam_code}), {_friendly_text(event_type)}.{dispatch}"
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(

@@ -74,18 +74,25 @@ async def deliver_notification(ctx, notification_event_id: int) -> None:
         # Best-effort side channels (email + WhatsApp), independent of push.
         if candidate is not None:
             name = f"{candidate.first_name} {candidate.last_name}".strip()
+            data = payload.get("data") or {}
+            regulator = data.get("regulator")
+            room = data.get("room")
             await channels.send_email_notification(
                 candidate_name=name,
                 ensam_code=candidate.ensam_code,
                 candidate_email=candidate.email,
                 candidate_phone=candidate.phone,
                 event_type=event.event_type,
+                regulator=regulator,
+                room=room,
             )
             await channels.send_whatsapp_notification(
                 candidate_name=name,
                 ensam_code=candidate.ensam_code,
                 candidate_phone=candidate.phone,
                 event_type=event.event_type,
+                regulator=regulator,
+                room=room,
             )
 
 
