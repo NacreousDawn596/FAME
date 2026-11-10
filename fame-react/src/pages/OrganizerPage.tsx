@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AppHeader, Icon } from '../components/Shared'
 import { api, ApiError } from '../api'
 import { connectWebSocket } from '../ws'
-import type { CandidateRow, DashboardResponse, FiliereQueue } from '../types'
+import type { CandidateRow, DashboardResponse, FiliereQueue, PublicConfig } from '../types'
 import type { Session } from '../auth'
 
 interface Props {
@@ -15,6 +15,10 @@ interface Props {
 export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnauthorized }: Props) {
   const [queues, setQueues] = useState<FiliereQueue[]>([])
   const [stats, setStats] = useState<DashboardResponse['stats'] | null>(null)
+  const [regulators, setRegulators] = useState<string[]>([])
+  const [rooms, setRooms] = useState<string[]>([])
+  const [regulator, setRegulator] = useState<string>('')
+  const [room, setRoom] = useState<string>('')
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<CandidateRow[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -23,9 +27,18 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
 
   const load = async () => {
     try {
-      const [dashboard, queueList] = await Promise.all([api.dashboard(), api.queues()])
+      const [dashboard, queueList, config] = await Promise.all([
+        api.dashboard(),
+        api.queues(),
+        api.config(),
+      ])
       setStats(dashboard.stats)
       setQueues(queueList)
+      setRegulators(config.regulators ?? [])
+      setRooms(config.rooms ?? [])
+      // Default selection: first regulator + its paired room.
+      setRegulator((current) => current || (config.regulators?.[0] ?? ''))
+      setRoom((current) => current || (config.rooms?.[0] ?? ''))
       const latest = dashboard.recent_operations[0]
       if (latest && (latest.operation_type === 'FIFO' || latest.operation_type === 'MANUAL')) {
         setLastAction({ name: latest.ensam_code, code: latest.ensam_code })
@@ -33,6 +46,13 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) onUnauthorized()
     }
+  }
+
+  // When the regulator changes, auto-select its paired room (by index).
+  const selectRegulator = (name: string) => {
+    setRegulator(name)
+    const idx = regulators.indexOf(name)
+    if (idx >= 0 && rooms[idx]) setRoom(rooms[idx])
   }
 
   useEffect(() => {
@@ -63,7 +83,7 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
 
   const attributeNext = async (filiere: string) => {
     try {
-      const result = await api.fifoAttribute(filiere, session.csrf)
+      const result = await api.fifoAttribute(filiere, regulator || null, room || null, session.csrf)
       setNotice(`${result.first_name} ${result.last_name} a été attribué(e).`)
       setSelectedId(null)
       setSearch('')
@@ -76,7 +96,7 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
   const attributeManual = async () => {
     if (selectedId == null) return
     try {
-      const result = await api.manualAttribute(selectedId, session.csrf)
+      const result = await api.manualAttribute(selectedId, regulator || null, room || null, session.csrf)
       setNotice(`${result.first_name} ${result.last_name} a été attribué(e) manuellement.`)
       setSelectedId(null)
       setSearch('')
@@ -118,6 +138,26 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
           <article><span className="stat-icon blue"><Icon name="users" /></span><div><small>Candidats inscrits</small><strong>{totalCandidates}</strong><em>Sur toutes les filières</em></div></article>
           <article><span className="stat-icon amber"><Icon name="clock" /></span><div><small>En attente</small><strong>{waitingTotal}</strong><em>Position recalculée en direct</em></div></article>
           <article><span className="stat-icon green"><Icon name="check" /></span><div><small>Déjà attribués</small><strong>{attributedTotal}</strong><em>Historique conservé</em></div></article>
+        </section>
+
+        <section className="organizer-panel assignment-panel">
+          <div className="organizer-panel-head">
+            <div><span className="eyebrow">DISPATCH</span><h2>Régulateur & salle</h2></div>
+          </div>
+          <div className="assignment-row">
+            <label>
+              <span>Régulateur</span>
+              <select value={regulator} onChange={(e) => selectRegulator(e.target.value)}>
+                {regulators.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>Salle</span>
+              <select value={room} onChange={(e) => setRoom(e.target.value)}>
+                {rooms.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </label>
+          </div>
         </section>
 
         {notice && <div className="organizer-notice"><Icon name="check" />{notice}<button onClick={() => setNotice('')} aria-label="Fermer">×</button></div>}

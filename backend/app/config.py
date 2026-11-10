@@ -64,6 +64,11 @@ class Settings(BaseSettings):
     notification_approaching_threshold: int = 5
     notification_urgent_threshold: int = 2
 
+    # --- Regulators / rooms ---
+    # Comma-separated names. regulator[i] is paired with rooms[i] (by index).
+    regulators: str = ""
+    rooms: str = ""
+
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def _split_origins(cls, v: object) -> object:
@@ -76,6 +81,23 @@ class Settings(BaseSettings):
     @property
     def allowed_origin_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def regulator_list(self) -> list[str]:
+        return [r.strip() for r in self.regulators.split(",") if r.strip()]
+
+    @property
+    def room_list(self) -> list[str]:
+        return [r.strip() for r in self.rooms.split(",") if r.strip()]
+
+    def room_for_regulator(self, regulator: str) -> str | None:
+        """Room paired with a regulator by index, or None."""
+        try:
+            idx = self.regulator_list.index(regulator)
+        except ValueError:
+            return None
+        rooms = self.room_list
+        return rooms[idx] if 0 <= idx < len(rooms) else None
 
     @property
     def is_production(self) -> bool:

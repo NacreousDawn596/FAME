@@ -210,12 +210,18 @@ async def attribute_next(
     organizer: CurrentOrganizer,
 ):
     code = None if body.filiere_code in (None, "", "_unspecified") else body.filiere_code
-    return await _fifo(session, organizer, code)
+    return await _fifo(session, organizer, code, body.regulator, body.room)
 
 
-async def _fifo(session: SessionDep, organizer: CurrentOrganizer, filiere_code: str | None):
+async def _fifo(
+    session: SessionDep,
+    organizer: CurrentOrganizer,
+    filiere_code: str | None,
+    regulator: str | None = None,
+    room: str | None = None,
+):
     try:
-        outcome = await attr.attribute_next(session, organizer.id, filiere_code)
+        outcome = await attr.attribute_next(session, organizer.id, filiere_code, regulator, room)
     except AttributionError as exc:
         raise HTTPException(exc.status_code, exc.detail) from exc
 
@@ -240,7 +246,9 @@ async def attribute_manual(
     organizer: CurrentOrganizer,
 ):
     try:
-        outcome = await attr.attribute_manual(session, organizer.id, body.candidate_id, body.reason)
+        outcome = await attr.attribute_manual(
+            session, organizer.id, body.candidate_id, body.reason, body.regulator, body.room
+        )
     except AttributionError as exc:
         raise HTTPException(exc.status_code, exc.detail) from exc
 
@@ -363,6 +371,8 @@ def _result(outcome: AttributionOutcome) -> AttributionResult:
         filiere_code=outcome.filiere_code or "",
         previous_position=outcome.previous_position,
         new_status=outcome.new_status,
+        regulator=outcome.regulator,
+        room=outcome.room,
         timestamp=outcome.timestamp,
     )
 

@@ -6,6 +6,8 @@ export interface PublicConfig {
   approaching_threshold: number
   urgent_threshold: number
   schoolapp_worker_url: string
+  regulators: string[]
+  rooms: string[]
   filieres: Filiere[]
 }
 
@@ -35,6 +37,8 @@ export interface QueueStatusInfo {
   company_name: string
   joined_at: string | null
   attributed_at: string | null
+  regulator: string | null
+  room: string | null
   message: string
 }
 
@@ -92,6 +96,8 @@ export interface AttributionResult {
   filiere_code: string
   previous_position: number | null
   new_status: string
+  regulator: string | null
+  room: string | null
   timestamp: string
 }
 

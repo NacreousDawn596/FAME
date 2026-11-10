@@ -68,16 +68,22 @@ class AttributionResult(BaseModel):
     filiere_code: str
     previous_position: int | None
     new_status: str
+    regulator: str | None
+    room: str | None
     timestamp: datetime
 
 
 class ManualAttributionRequest(BaseModel):
     candidate_id: int
     reason: str | None = None
+    regulator: str | None = None
+    room: str | None = None
 
 
 class FifoRequest(BaseModel):
     filiere_code: str | None = None
+    regulator: str | None = None
+    room: str | None = None
 
 
 class NotificationTestRequest(BaseModel):

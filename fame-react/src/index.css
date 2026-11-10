@@ -799,3 +799,9 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
 .callout-note { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0 0 14px; }
 
 .empty-board { padding: 28px 20px; text-align: center; color: var(--muted); font-size: 12px; }
+
+/* --- Dispatch (regulator + room) assignment --- */
+.assignment-panel { margin-bottom: 18px; }
+.assignment-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.assignment-row label { display: flex; flex-direction: column; gap: 6px; font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; flex: 1; min-width: 180px; }
+.assignment-row select { height: 38px; border: 1px solid var(--border); border-radius: 9px; background: white; padding: 0 12px; color: var(--navy); font-size: 13px; text-transform: none; letter-spacing: normal; }

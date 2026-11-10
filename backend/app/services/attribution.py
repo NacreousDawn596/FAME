@@ -35,6 +35,8 @@ class AttributionOutcome:
     filiere_code: str | None
     previous_position: int | None
     new_status: str
+    regulator: str | None
+    room: str | None
     timestamp: datetime
     affected_filiere: str | None
     # candidate ids whose queue status changed (for WS + notifications)
@@ -49,6 +51,9 @@ def _apply_status(entry: QueueEntry, new_status: QueueStatus, now: datetime) -> 
     entry.status = new_status
     entry.attributed_at = now if new_status == QueueStatus.ATTRIBUTED else None
     entry.cancelled_at = now if new_status == QueueStatus.CANCELLED else None
+    if new_status != QueueStatus.ATTRIBUTED:
+        entry.regulator = None
+        entry.room = None
     entry.version = (entry.version or 0) + 1
 
 
@@ -67,6 +72,8 @@ async def _record(
     undo_of: int | None = None,
     related_event_id: int | None = None,
     reason: str | None = None,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> AttributionEvent:
     event = AttributionEvent(
         candidate_id=candidate_id,
@@ -81,6 +88,8 @@ async def _record(
         undo_of=undo_of,
         related_event_id=related_event_id,
         reason=reason,
+        regulator=regulator,
+        room=room,
     )
     session.add(event)
     await session.flush()
@@ -97,6 +106,8 @@ def _outcome(event: AttributionEvent, candidate: Candidate, entry: QueueEntry, p
         filiere_code=entry.filiere_code,
         previous_position=prev_pos,
         new_status=entry.status.value,
+        regulator=entry.regulator,
+        room=entry.room,
         timestamp=_now(),
         affected_filiere=entry.filiere_code,
         notify_candidate_id=candidate.id,
@@ -114,7 +125,11 @@ async def _load_candidate(session: AsyncSession, candidate_id: int) -> Candidate
 
 
 async def attribute_next(
-    session: AsyncSession, organizer_id: int, filiere_code: str | None
+    session: AsyncSession,
+    organizer_id: int,
+    filiere_code: str | None,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> AttributionOutcome:
     now = _now()
     stmt = (
@@ -137,6 +152,8 @@ async def attribute_next(
     prev_pos = await get_queue_position(session, entry)
 
     _apply_status(entry, QueueStatus.ATTRIBUTED, now)
+    entry.regulator = regulator
+    entry.room = room
     event = await _record(
         session,
         candidate_id=candidate.id,
@@ -148,6 +165,8 @@ async def attribute_next(
         new_filiere=entry.filiere_code,
         previous_queue_position=prev_pos,
         new_queue_position=None,
+        regulator=regulator,
+        room=room,
     )
     return _outcome(event, candidate, entry, prev_pos)
 
@@ -160,6 +179,8 @@ async def attribute_manual(
     organizer_id: int,
     candidate_id: int,
     reason: str | None = None,
+    regulator: str | None = None,
+    room: str | None = None,
 ) -> AttributionOutcome:
     now = _now()
     candidate = await _load_candidate(session, candidate_id)
@@ -175,6 +196,8 @@ async def attribute_manual(
     prev_state = entry.status
 
     _apply_status(entry, QueueStatus.ATTRIBUTED, now)
+    entry.regulator = regulator
+    entry.room = room
     event = await _record(
         session,
         candidate_id=candidate.id,
@@ -187,6 +210,8 @@ async def attribute_manual(
         previous_queue_position=prev_pos,
         new_queue_position=None,
         reason=reason,
+        regulator=regulator,
+        room=room,
     )
     return _outcome(event, candidate, entry, prev_pos)
 

@@ -172,6 +172,13 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
           <section className="callout-card">
             <div className="turn-badge"><Icon name="spark" /> C’EST VOTRE TOUR !</div>
             <h2>Présentez-vous au Régulateur</h2>
+            {(queue?.regulator || queue?.room) && (
+              <div className="location">
+                {queue?.regulator && <div><span>RÉGULATEUR</span><strong>{queue.regulator}</strong></div>}
+                {queue?.regulator && queue?.room && <i />}
+                {queue?.room && <div><span>SALLE</span><strong>{queue.room}</strong></div>}
+              </div>
+            )}
             <p className="callout-note">{queue?.message}</p>
           </section>
         )}

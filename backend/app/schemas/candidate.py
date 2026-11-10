@@ -31,6 +31,8 @@ class QueueStatusResponse(BaseModel):
     company_name: str
     joined_at: datetime | None
     attributed_at: datetime | None
+    regulator: str | None
+    room: str | None
     message: str
 
 

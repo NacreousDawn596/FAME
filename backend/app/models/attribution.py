@@ -47,6 +47,8 @@ class AttributionEvent(Base):
         BigInteger, ForeignKey("attribution_events.id", ondelete="SET NULL"), nullable=True
     )
     reason: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    regulator: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    room: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

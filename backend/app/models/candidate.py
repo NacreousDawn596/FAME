@@ -87,6 +87,9 @@ class QueueEntry(Base):
     )
     attributed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Assigned regulator / room (set when the candidate is attributed).
+    regulator: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    room: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # Optimistic-locking version; incremented on every state transition.
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 

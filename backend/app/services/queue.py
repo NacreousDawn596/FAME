@@ -127,6 +127,8 @@ async def get_candidate_status(
             "company_name": await company_name,
             "joined_at": None,
             "attributed_at": None,
+            "regulator": None,
+            "room": None,
             "message": "You are not yet in a queue.",
         }
 
@@ -145,6 +147,8 @@ async def get_candidate_status(
         "company_name": await company_name,
         "joined_at": entry.joined_at,
         "attributed_at": entry.attributed_at,
+        "regulator": entry.regulator,
+        "room": entry.room,
         "message": message,
     }
 

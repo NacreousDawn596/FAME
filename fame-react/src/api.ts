@@ -86,17 +86,17 @@ export const api = {
     ),
 
   // Attribution
-  fifoAttribute: (filiereCode: string | null, csrf: string) =>
+  fifoAttribute: (filiereCode: string | null, regulator: string | null, room: string | null, csrf: string) =>
     request<AttributionResult>('/api/v1/organizer/attributions/fifo', {
       method: 'POST',
       headers: { 'X-CSRF-Token': csrf },
-      body: JSON.stringify({ filiere_code: filiereCode }),
+      body: JSON.stringify({ filiere_code: filiereCode, regulator, room }),
     }),
-  manualAttribute: (candidateId: number, csrf: string) =>
+  manualAttribute: (candidateId: number, regulator: string | null, room: string | null, csrf: string) =>
     request<AttributionResult>('/api/v1/organizer/attributions/manual', {
       method: 'POST',
       headers: { 'X-CSRF-Token': csrf },
-      body: JSON.stringify({ candidate_id: candidateId }),
+      body: JSON.stringify({ candidate_id: candidateId, regulator, room }),
     }),
   undoLast: (csrf: string) =>
     request<AttributionResult>('/api/v1/organizer/operations/undo-last', {

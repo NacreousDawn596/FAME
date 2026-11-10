@@ -26,6 +26,8 @@ async def public_config(session: SessionDep):
         "approaching_threshold": settings.notification_approaching_threshold,
         "urgent_threshold": settings.notification_urgent_threshold,
         "schoolapp_worker_url": settings.schoolapp_worker_url,
+        "regulators": settings.regulator_list,
+        "rooms": settings.room_list,
         "filieres": [
             {
                 "code": f.code,
