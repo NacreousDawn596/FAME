@@ -83,11 +83,11 @@ async def test_double_attribution_rejected():
             await attr.attribute_manual(s, org_id, c1.id)
 
 
-async def test_undo_attribution_restores_position():
+async def test_undo_attribution_moves_to_bottom():
     org_id = await _make_organizer()
     async with SessionFactory() as s:
         await _register(s, ["E1", "E2", "E3"])
-        await attr.attribute_next(s, org_id, "GI-ILSI")
+        await attr.attribute_next(s, org_id, "GI-ILSI")  # E1 attributed
         await s.commit()
         c1, _ = await _entry(s, "E1")
         await attr.undo_attribution(s, org_id, c1.id)
@@ -95,7 +95,8 @@ async def test_undo_attribution_restores_position():
 
         _, e1 = await _entry(s, "E1")
         assert e1.status == QueueStatus.WAITING
-        assert await get_queue_position(s, e1) == 1  # restored to front
+        # Undone candidate rejoins at the bottom (E2 and E3 are ahead).
+        assert await get_queue_position(s, e1) == 3
 
 
 async def test_cancel_and_restore():

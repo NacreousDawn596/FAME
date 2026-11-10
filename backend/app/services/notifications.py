@@ -104,7 +104,7 @@ async def schedule_threshold_notifications(
             QueueEntry.status == QueueStatus.WAITING,
         )
         .order_by(QueueEntry.joined_at, QueueEntry.id)
-        .limit(threshold + 1)
+        .limit(threshold)
     )
     entries = (await session.execute(stmt)).scalars().all()
 

@@ -38,7 +38,13 @@ concurrency test (`test_concurrent_fifo_no_double_attribution`) verifies this.
 
 ## Reversibility
 
-Because `joined_at` is never modified, undoing an attribution naturally restores
-the candidate's original position. Every transition is recorded in
-`attribution_events`, and undo operations create their own audit events (history
-is never erased).
+Undoing an attribution returns the candidate to `WAITING`, but they **rejoin at
+the bottom** of their filière queue (`joined_at` is reset to now) rather than at
+their original position. Every transition is recorded in `attribution_events`,
+and undo operations create their own audit events (history is never erased).
+
+## Notifications
+
+Each time a candidate is attributed, the **5 following** candidates in that
+filière are notified (position 1 → `IMMEDIATE`, 2 → `URGENT`, 3–5 →
+`APPROACHING`) across Web Push, WhatsApp, and email.

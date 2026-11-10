@@ -225,7 +225,7 @@ erDiagram
 
 Faits notables :
 
-- `candidate_id` est **unique** dans `queue_entries` : une seule entrée de file par candidat, réutilisée à chaque transition (le `joined_at` n'est jamais modifié — c'est ce qui permet la restauration exacte de la position).
+- `candidate_id` est **unique** dans `queue_entries` : une seule entrée de file par candidat, réutilisée à chaque transition. Lorsqu'une attribution est annulée, `joined_at` est remis à « maintenant » : le candidat **revient en bas de sa file**.
 - La position est **calculée** via une fonction fenêtre (`ROW_NUMBER`) ou un `COUNT`, jamais stockée.
 - `attribution_events` est append-only : l'annulation référence l'événement d'origine via `undo_of`.
 - Le catalogue des filières (37 enregistrements) est seedé par la migration initiale et par le script de seed.
@@ -246,7 +246,7 @@ stateDiagram-v2
     CANCELLED --> WAITING : restauration
 ```
 
-La position est déterministe sur `(joined_at, id)`. Toute transition est enregistrée dans `attribution_events` avec l'état précédent et le nouveau ; l'annulation restaure l'état précédent sans jamais effacer l'historique. Le détail est dans [`docs/queue.md`](docs/queue.md).
+La position est déterministe sur `(joined_at, id)`. Toute transition est enregistrée dans `attribution_events` avec l'état précédent et le nouveau. Une attribution annulée **replace le candidat en bas de sa file** (au lieu de restaurer sa position d'origine). À chaque attribution, les **5 candidats suivants** de la filière sont notifiés (push, WhatsApp, e-mail). Le détail est dans [`docs/queue.md`](docs/queue.md).
 
 ---
 

@@ -77,7 +77,7 @@ async def test_full_lifecycle(client, schoolapp_assertion_factory, schoolapp_key
     r = await client.get("/api/v1/candidate/queue", cookies=candidate_cookies)
     assert r.json()["status"] == "ATTRIBUTED"
 
-    # 7. Undo the attribution; E1 returns to waiting at front.
+    # 7. Undo the attribution; E1 rejoins the queue at the bottom (after E2).
     r = await client.post(
         f"/api/v1/organizer/attributions/{body['candidate']['id']}/undo",
         cookies=org_cookies,
@@ -87,7 +87,7 @@ async def test_full_lifecycle(client, schoolapp_assertion_factory, schoolapp_key
 
     r = await client.get("/api/v1/candidate/queue", cookies=candidate_cookies)
     assert r.json()["status"] == "WAITING"
-    assert r.json()["position"] == 1
+    assert r.json()["position"] == 2
 
     # 8. History contains the operations.
     r = await client.get("/api/v1/organizer/history", cookies=org_cookies)
