@@ -14,10 +14,10 @@ logger = logging.getLogger("fame")
 def _friendly_text(event_type: str) -> str:
     return {
         "ATTRIBUTED": "votre tour est arrivé — présentez-vous au régulateur",
-        "IMMEDIATE": "vous êtes le prochain — restez à proximité",
+        "IMMEDIATE": "vous êtes le prochain — présentez-vous",
         "URGENT": "votre tour approche",
         "APPROACHING": "votre tour approche",
-        "REVERSED": "vous êtes de nouveau en file d'attente",
+        "REVERSED": "vous êtes de nouveau en file d'attente (en fin de file)",
         "RETURNED": "votre statut a changé",
         "CANCELLED": "votre statut a changé",
     }.get(event_type, "votre statut a changé")
@@ -54,11 +54,14 @@ async def send_email_notification(
     )
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            await client.post(
+            resp = await client.post(
                 f"https://formsubmit.co/ajax/{settings.notification_email}",
                 headers={
                     "Accept": "application/json",
                     "Content-Type": "application/json",
+                    # FormSubmit rejects requests without a web Origin/Referer.
+                    "Origin": settings.frontend_url,
+                    "Referer": f"{settings.frontend_url}/",
                 },
                 json={
                     "name": candidate_name,
@@ -68,7 +71,17 @@ async def send_email_notification(
                     "_captcha": "false",
                 },
             )
-        logger.info("[email] sent for %s", ensam_code)
+        body = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+        success = str(body.get("success", "true")).lower() != "false"
+        if resp.status_code >= 400 or not success:
+            logger.warning(
+                "[email] rejected for %s (%s): %s",
+                ensam_code,
+                resp.status_code,
+                body.get("message", "unknown"),
+            )
+        else:
+            logger.info("[email] sent for %s", ensam_code)
     except Exception as exc:  # noqa: BLE001 - best-effort channel
         logger.warning("[email] failed for %s: %s", ensam_code, exc)
 

@@ -24,15 +24,15 @@ def build_payload(
     title = "FAME"
     body = "Your queue status has changed."
     if event_type == NotificationEventType.ATTRIBUTED:
-        body = "You have been called."
+        body = "You have been called. Please present yourself."
     elif event_type == NotificationEventType.IMMEDIATE:
-        body = "You are next. Please stay nearby."
+        body = "You are next. Please present yourself."
     elif event_type == NotificationEventType.URGENT:
         body = "Your turn is approaching. Please stay nearby."
     elif event_type == NotificationEventType.APPROACHING:
         body = "Your turn is approaching."
     elif event_type == NotificationEventType.REVERSED:
-        body = "You're back in the waiting queue."
+        body = "You're back in the waiting queue (at the end)."
     elif event_type == NotificationEventType.RETURNED:
         body = "Your queue status has changed."
     elif event_type == NotificationEventType.CANCELLED:
