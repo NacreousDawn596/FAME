@@ -3,13 +3,16 @@ import LoginPage from './pages/LoginPage'
 import StudentPage from './pages/StudentPage'
 import OrganizerPage from './pages/OrganizerPage'
 import PublicPage from './pages/PublicPage'
-import { clearSession, readSession, type Session } from './auth'
+import ConfirmContact from './pages/ConfirmContact'
+import { clearSession, readSession, updateContact, type Session } from './auth'
 
-type Route = 'login' | 'student' | 'organizer' | 'public'
+type Route = 'login' | 'confirm' | 'student' | 'organizer' | 'public'
 
 const routeFromHash = (): Route => {
   const value = window.location.hash.replace(/^#\/?/, '')
-  return value === 'student' || value === 'organizer' || value === 'public' ? value : 'login'
+  return value === 'confirm' || value === 'student' || value === 'organizer' || value === 'public'
+    ? value
+    : 'login'
 }
 
 export default function App() {
@@ -39,11 +42,22 @@ export default function App() {
   useEffect(() => {
     if (route === 'student' && session?.role !== 'candidate') navigate('login', true)
     if (route === 'organizer' && session?.role !== 'organizer') navigate('login', true)
+    if (route === 'confirm' && session?.role !== 'candidate') navigate('login', true)
+    // Skip confirmation once the candidate has already confirmed their contact.
+    if (route === 'confirm' && session?.contactConfirmed) navigate('student', true)
   }, [route, session, navigate])
 
   const signIn = (next: Session) => {
     setSession(next)
-    navigate(next.role === 'organizer' ? 'organizer' : 'student')
+    if (next.role === 'organizer') navigate('organizer')
+    else if (next.contactConfirmed) navigate('student')
+    else navigate('confirm')
+  }
+
+  const confirmContact = (email: string, phone: string) => {
+    const updated = updateContact(email, phone)
+    if (updated) setSession(updated)
+    navigate('student')
   }
 
   const signOut = () => {
@@ -62,6 +76,9 @@ export default function App() {
   return (
     <div className={`app ${route === 'public' ? 'display-mode' : ''}`}>
       {route === 'login' && <LoginPage onSuccess={signIn} />}
+      {route === 'confirm' && session?.role === 'candidate' && (
+        <ConfirmContact session={session} onConfirm={confirmContact} onLogout={signOut} />
+      )}
       {route === 'student' && session?.role === 'candidate' && (
         <StudentPage session={session} onLogout={signOut} onUnauthorized={signOut} />
       )}

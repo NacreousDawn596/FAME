@@ -13,7 +13,14 @@ class CandidateProfile(BaseModel):
     first_name: str
     last_name: str
     year: str | None
+    email: str | None
+    phone: str | None
     filiere_code: str | None
+
+
+class ContactUpdateRequest(BaseModel):
+    email: str | None = None
+    phone: str | None = None
 
 
 class QueueStatusResponse(BaseModel):

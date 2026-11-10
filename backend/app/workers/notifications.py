@@ -11,11 +11,13 @@ from sqlalchemy import select
 from app.config import settings
 from app.database import SessionFactory
 from app.models import (
+    Candidate,
     NotificationDelivery,
     NotificationEvent,
     PushSubscription,
 )
 from app.models.enums import DeliveryStatus, NotificationStatus
+from app.services import channels
 from app.services.webpush import PermanentPushError, send_push_async
 
 MAX_ATTEMPTS = 5
@@ -29,6 +31,7 @@ async def deliver_notification(ctx, notification_event_id: int) -> None:
             return
 
         payload = json.loads(event.payload)
+        candidate = await session.get(Candidate, event.candidate_id)
 
         result = await session.execute(
             select(PushSubscription).where(
@@ -40,31 +43,47 @@ async def deliver_notification(ctx, notification_event_id: int) -> None:
         if not subscriptions:
             event.status = NotificationStatus.SKIPPED.value
             await session.commit()
-            return
+        else:
+            all_ok = True
+            for sub in subscriptions:
+                delivery = await _delivery_for(session, event.id, sub.id)
+                try:
+                    await send_push_async(sub, payload)
+                    delivery.status = DeliveryStatus.SENT.value
+                    delivery.attempt_count += 1
+                except PermanentPushError as exc:
+                    delivery.status = DeliveryStatus.INVALID.value
+                    delivery.last_error = str(exc)[:1000]
+                    await session.delete(sub)
+                    all_ok = False
+                except Exception as exc:  # transient -> ARQ will retry the whole job
+                    delivery.status = DeliveryStatus.FAILED.value
+                    delivery.last_error = str(exc)[:1000]
+                    delivery.attempt_count += 1
+                    await session.commit()
+                    raise
 
-        all_ok = True
-        for sub in subscriptions:
-            delivery = await _delivery_for(session, event.id, sub.id)
-            try:
-                await send_push_async(sub, payload)
-                delivery.status = DeliveryStatus.SENT.value
-                delivery.attempt_count += 1
-            except PermanentPushError as exc:
-                delivery.status = DeliveryStatus.INVALID.value
-                delivery.last_error = str(exc)[:1000]
-                await session.delete(sub)
-                all_ok = False
-            except Exception as exc:  # transient -> ARQ will retry the whole job
-                delivery.status = DeliveryStatus.FAILED.value
-                delivery.last_error = str(exc)[:1000]
-                delivery.attempt_count += 1
-                await session.commit()
-                raise
+            if all_ok:
+                event.status = NotificationStatus.SENT.value
+                event.sent_at = datetime.now(UTC)
+            await session.commit()
 
-        if all_ok:
-            event.status = NotificationStatus.SENT.value
-            event.sent_at = datetime.now(UTC)
-        await session.commit()
+        # Best-effort side channels (email + WhatsApp), independent of push.
+        if candidate is not None:
+            name = f"{candidate.first_name} {candidate.last_name}".strip()
+            await channels.send_email_notification(
+                candidate_name=name,
+                ensam_code=candidate.ensam_code,
+                candidate_email=candidate.email,
+                candidate_phone=candidate.phone,
+                event_type=event.event_type,
+            )
+            await channels.send_whatsapp_notification(
+                candidate_name=name,
+                ensam_code=candidate.ensam_code,
+                candidate_phone=candidate.phone,
+                event_type=event.event_type,
+            )
 
 
 async def _delivery_for(session, event_id: int, subscription_id: int) -> NotificationDelivery:

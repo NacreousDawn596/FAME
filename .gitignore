@@ -50,3 +50,7 @@ vapid_keys/
 
 # Local deployment scripts with secrets
 start.sh
+
+# WhatsApp bridge session (never commit)
+.wwebjs_auth/
+.wwebjs_cache/

@@ -42,6 +42,8 @@ class Candidate(Base):
     first_name: Mapped[str] = mapped_column(String(128), nullable=False)
     last_name: Mapped[str] = mapped_column(String(128), nullable=False)
     year: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
     filiere_code: Mapped[str | None] = mapped_column(
         String(32), ForeignKey("filieres.code", ondelete="SET NULL"), nullable=True, index=True
     )

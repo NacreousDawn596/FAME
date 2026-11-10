@@ -63,6 +63,8 @@ async def register_candidate(
     """
     ensam_code = identity.ensam_code
     filiere_code = resolve_filiere(identity.filiere)
+    email = getattr(identity, "email", None)
+    phone = getattr(identity, "phone", None)
 
     result = await session.execute(
         select(Candidate).where(Candidate.ensam_code == ensam_code)
@@ -75,6 +77,8 @@ async def register_candidate(
             first_name=identity.first_name or "—",
             last_name=identity.last_name or "—",
             year=identity.year,
+            email=email,
+            phone=phone,
             filiere_code=filiere_code,
         )
         session.add(candidate)
@@ -85,6 +89,10 @@ async def register_candidate(
         candidate.last_name = identity.last_name or candidate.last_name
         if identity.year:
             candidate.year = identity.year
+        if email:
+            candidate.email = email
+        if phone:
+            candidate.phone = phone
         if filiere_code and candidate.filiere_code != filiere_code:
             candidate.filiere_code = filiere_code
 

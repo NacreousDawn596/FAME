@@ -9,6 +9,7 @@ from app.models import PushSubscription
 from app.schemas.candidate import (
     CandidateMeResponse,
     CandidateProfile,
+    ContactUpdateRequest,
     PushSubscriptionRequest,
     PushSubscriptionResponse,
 )
@@ -26,6 +27,8 @@ def _profile(candidate) -> CandidateProfile:
         first_name=candidate.first_name,
         last_name=candidate.last_name,
         year=candidate.year,
+        email=candidate.email,
+        phone=candidate.phone,
         filiere_code=candidate.filiere_code,
     )
 
@@ -102,3 +105,21 @@ async def withdraw(session: SessionDep, candidate: CurrentCandidate):
         raise HTTPException(status.HTTP_409_CONFLICT, "Not currently waiting")
     await session.commit()
     return {"ok": True}
+
+
+@router.post("/contact", dependencies=[Depends(candidate_csrf)])
+async def update_contact(
+    body: ContactUpdateRequest,
+    session: SessionDep,
+    candidate: CurrentCandidate,
+):
+    if body.email is not None:
+        candidate.email = body.email.strip() or None
+    if body.phone is not None:
+        candidate.phone = body.phone.strip() or None
+    await session.commit()
+    return {
+        "ok": True,
+        "email": candidate.email,
+        "phone": candidate.phone,
+    }

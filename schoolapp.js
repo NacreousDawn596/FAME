@@ -74,6 +74,7 @@ async function authenticateWithSchoolApp(username, password, env) {
   const personal = profile.personal_info || {};
   const academic = profile.academic_info || {};
   const administrative = profile.administrative_info || {};
+  const contact = profile.contact_info || {};
 
   const ensamCode =
     personal["Code"] ||
@@ -84,6 +85,11 @@ async function authenticateWithSchoolApp(username, password, env) {
   const firstName = personal["Prénom"] || personal["Nom"]?.split(" ")[0] || "";
   const lastName = personal["Nom"] || "";
   const year = academic["Niveau Accès"] || academic["Annee Accès"] || "";
+
+  // Contact info: email is the login address, phone comes from the profile.
+  const email = username || "";
+  const phone =
+    contact["Téléphone"] || contact["Telephone"] || contact["Tél"] || contact["phone"] || "";
 
   // The student's current filière comes from their academic-year results.
   let filiere = "";
@@ -107,6 +113,8 @@ async function authenticateWithSchoolApp(username, password, env) {
     year: year,
     ensamCode: ensamCode,
     filiere: filiere,
+    email: email,
+    phone: phone,
   };
 }
 
@@ -121,6 +129,8 @@ async function signAssertion(identity, env) {
     lastName: identity.lastName,
     year: identity.year,
     filiere: identity.filiere,
+    email: identity.email,
+    phone: identity.phone,
     iss: env.SCHOOLAPP_ISSUER || DEFAULT_ISSUER,
     aud: env.SCHOOLAPP_AUDIENCE || DEFAULT_AUDIENCE,
     iat: now,

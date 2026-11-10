@@ -63,6 +63,12 @@ export const api = {
     }),
   withdraw: (csrf: string) =>
     request('/api/v1/candidate/withdraw', { method: 'POST', headers: { 'X-CSRF-Token': csrf } }),
+  updateContact: (email: string, phone: string, csrf: string) =>
+    request('/api/v1/candidate/contact', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf },
+      body: JSON.stringify({ email, phone }),
+    }),
 
   // Organizer auth
   organizerLogin: (username: string, password: string) =>

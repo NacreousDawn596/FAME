@@ -60,6 +60,8 @@ async def schoolapp_auth(
             first_name=candidate.first_name,
             last_name=candidate.last_name,
             year=candidate.year,
+            email=candidate.email,
+            phone=candidate.phone,
             filiere_code=candidate.filiere_code,
         ),
         "csrf": csrf,
@@ -74,6 +76,8 @@ async def get_me(candidate: CurrentCandidate):
         first_name=candidate.first_name,
         last_name=candidate.last_name,
         year=candidate.year,
+        email=candidate.email,
+        phone=candidate.phone,
         filiere_code=candidate.filiere_code,
     )
 

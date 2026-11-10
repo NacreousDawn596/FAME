@@ -4,6 +4,9 @@ export interface Session {
   role: Role
   csrf: string
   name: string
+  email: string
+  phone: string
+  contactConfirmed: boolean
 }
 
 const STORAGE_KEY = 'fame-session'
@@ -22,8 +25,25 @@ function persist(session: Session | null) {
   else localStorage.removeItem(STORAGE_KEY)
 }
 
-export function setSession(role: Role, csrf: string, name: string): Session {
-  const session: Session = { role, csrf, name }
+export function setSession(
+  role: Role,
+  csrf: string,
+  name: string,
+  email = '',
+  phone = '',
+  contactConfirmed = false,
+): Session {
+  const session: Session = { role, csrf, name, email, phone, contactConfirmed }
+  persist(session)
+  return session
+}
+
+export function updateContact(email: string, phone: string): Session | null {
+  const session = readSession()
+  if (!session) return null
+  session.email = email
+  session.phone = phone
+  session.contactConfirmed = true
   persist(session)
   return session
 }

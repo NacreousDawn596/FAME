@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     # push service queue and deliver it when the device reconnects.
     push_ttl_seconds: int = 300
 
+    # --- Additional notification channels ---
+    # Email notifications (FormSubmit) are delivered to this address.
+    notification_email: str = "fame@gadzarts.xyz"
+    # WhatsApp notifications go through a local whatsapp-web.js bridge.
+    whatsapp_bridge_url: str = "http://localhost:3000"
+    email_notifications_enabled: bool = True
+    whatsapp_notifications_enabled: bool = True
+
     # --- URLs ---
     frontend_url: str = "http://localhost:5173"
     api_url: str = "http://localhost:8000"

@@ -22,6 +22,8 @@ export interface CandidateProfile {
   first_name: string
   last_name: string
   year: string | null
+  email: string | null
+  phone: string | null
   filiere_code: string | null
 }
 

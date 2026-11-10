@@ -1,0 +1,14 @@
+{
+  "name": "fame-whatsapp-bridge",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node bridge.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.25.0"
+  }
+}

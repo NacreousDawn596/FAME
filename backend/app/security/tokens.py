@@ -31,6 +31,8 @@ class SchoolAppIdentity:
     last_name: str
     year: str | None
     filiere: str | None
+    email: str | None
+    phone: str | None
 
 
 def _decode_ed25519_token(token: str) -> dict:
@@ -96,6 +98,8 @@ def verify_schoolapp_assertion(token: str) -> SchoolAppIdentity:
         last_name=str(claims.get("lastName", "")).strip(),
         year=str(claims.get("year", "")).strip() or None,
         filiere=str(claims.get("filiere", "")).strip() or None,
+        email=str(claims.get("email", "")).strip() or None,
+        phone=str(claims.get("phone", "")).strip() or None,
     )
 
 

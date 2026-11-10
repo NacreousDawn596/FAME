@@ -22,7 +22,16 @@ export default function LoginPage({ onSuccess }: { onSuccess: (session: Session)
         const assertion = await authenticateWithSchoolApp(email.trim(), password)
         const result = await api.schoolappLogin(assertion)
         const name = `${result.candidate.first_name} ${result.candidate.last_name}`.trim()
-        onSuccess(setSession('candidate', result.csrf, name))
+        onSuccess(
+          setSession(
+            'candidate',
+            result.csrf,
+            name,
+            result.candidate.email ?? '',
+            result.candidate.phone ?? '',
+            false,
+          ),
+        )
       } else {
         const result = await api.organizerLogin(username.trim(), password)
         onSuccess(setSession('organizer', result.csrf, result.username))
