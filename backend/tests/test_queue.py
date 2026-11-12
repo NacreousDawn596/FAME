@@ -1,5 +1,6 @@
 """Queue registration, ordering, and position tests."""
 
+import asyncio
 from types import SimpleNamespace
 
 from sqlalchemy import func, select
@@ -7,7 +8,7 @@ from sqlalchemy import func, select
 from app.database import SessionFactory
 from app.models import Candidate, QueueEntry
 from app.models.enums import QueueStatus
-from app.services.queue import get_queue_position, register_candidate
+from app.services.queue import get_queue_position, register_candidate, withdraw_candidate
 
 
 def ident(ensam, name="A", last="B", year="3A", filiere="GI-ILSI"):
@@ -75,3 +76,53 @@ async def test_resolve_filiere_on_registration():
         c = await register_candidate(s, ident("E1", filiere="Génie Informatique : Ingénierie Logicielle et Systèmes Intelligents"))
         await s.commit()
         assert c.filiere_code == "GI-ILSI"
+
+
+async def test_concurrent_registration_positions_unique():
+    async def register(code):
+        async with SessionFactory() as s:
+            await register_candidate(s, ident(code))
+            await s.commit()
+
+    await asyncio.gather(*[register(f"E{i}") for i in range(100)])
+
+    async with SessionFactory() as s:
+        entries = (
+            (
+                await s.execute(
+                    select(QueueEntry)
+                    .where(QueueEntry.status == QueueStatus.WAITING)
+                    .order_by(QueueEntry.joined_at, QueueEntry.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        positions = [await get_queue_position(s, e) for e in entries]
+        # No duplicate ranks and no gaps: exactly 1..100, each unique.
+        assert sorted(positions) == list(range(1, 101))
+        assert len(set(positions)) == 100
+
+
+async def test_rejoin_after_withdraw_moves_to_bottom():
+    async with SessionFactory() as s:
+        for code in ["E1", "E2", "E3"]:
+            await register_candidate(s, ident(code))
+        await s.commit()
+
+        c1 = (
+            await s.execute(select(Candidate).where(Candidate.ensam_code == "E1"))
+        ).scalar_one()
+        assert await withdraw_candidate(s, c1.id) is True
+        await s.commit()
+
+        # Re-login (register again) after withdrawing.
+        await register_candidate(s, ident("E1"))
+        await s.commit()
+
+        entry = (
+            await s.execute(select(QueueEntry).where(QueueEntry.candidate_id == c1.id))
+        ).scalar_one()
+        assert entry.status == QueueStatus.WAITING
+        # Re-joined candidate is pushed to the bottom (E2, E3 are ahead).
+        assert await get_queue_position(s, entry) == 3

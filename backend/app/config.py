@@ -33,6 +33,9 @@ class Settings(BaseSettings):
 
     # --- Organizer ---
     organizer_initial_emails: str = ""  # comma-separated
+    # Optional fixed password for bootstrap organizers. When empty, a random
+    # temporary password is generated per account (and only logged, not stored).
+    organizer_initial_password: str = ""
 
     # --- Session / security ---
     session_secret: str = "insecure-dev-secret"

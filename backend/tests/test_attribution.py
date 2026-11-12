@@ -83,7 +83,7 @@ async def test_double_attribution_rejected():
             await attr.attribute_manual(s, org_id, c1.id)
 
 
-async def test_undo_attribution_moves_to_bottom():
+async def test_undo_attribution_restores_position():
     org_id = await _make_organizer()
     async with SessionFactory() as s:
         await _register(s, ["E1", "E2", "E3"])
@@ -95,7 +95,24 @@ async def test_undo_attribution_moves_to_bottom():
 
         _, e1 = await _entry(s, "E1")
         assert e1.status == QueueStatus.WAITING
-        # Undone candidate rejoins at the bottom (E2 and E3 are ahead).
+        # Undo restores the candidate to their previous rank (head of queue),
+        # not the bottom.
+        assert await get_queue_position(s, e1) == 1
+
+
+async def test_return_to_queue_moves_to_bottom():
+    org_id = await _make_organizer()
+    async with SessionFactory() as s:
+        await _register(s, ["E1", "E2", "E3"])
+        await attr.attribute_next(s, org_id, "GI-ILSI")  # E1 attributed
+        await s.commit()
+        c1, _ = await _entry(s, "E1")
+        await attr.return_to_queue(s, org_id, c1.id)
+        await s.commit()
+
+        _, e1 = await _entry(s, "E1")
+        assert e1.status == QueueStatus.WAITING
+        # Return-to-queue sends the candidate to the bottom (E2 and E3 ahead).
         assert await get_queue_position(s, e1) == 3
 
 
@@ -128,6 +145,25 @@ async def test_undo_last_reverses_fifo():
         assert outcome.new_status == "WAITING"
         _, e1 = await _entry(s, "E1")
         assert e1.status == QueueStatus.WAITING
+        # Undo-last restores the candidate to their previous rank (position 1).
+        assert await get_queue_position(s, e1) == 1
+
+
+async def test_undo_last_restores_manual_rank():
+    org_id = await _make_organizer()
+    async with SessionFactory() as s:
+        await _register(s, ["E1", "E2", "E3"])
+        c2, _ = await _entry(s, "E2")
+        await attr.attribute_manual(s, org_id, c2.id)
+        await s.commit()
+
+        await attr.undo_last(s, org_id)
+        await s.commit()
+
+        _, e2 = await _entry(s, "E2")
+        assert e2.status == QueueStatus.WAITING
+        # E2 was manually attributed from position 2; undo restores that rank.
+        assert await get_queue_position(s, e2) == 2
 
 
 async def test_concurrent_fifo_no_double_attribution():

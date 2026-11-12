@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#091d40" />
+    <meta name="description" content="FAME — Plateforme de recrutement PFE ENSAM Meknès." />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>FAME — ENSAM Meknès</title>
+    <style>
+      :root { --navy: #0f2b5c; --navy-deep: #091d40; --gold: #c59b27; --gold-light: #e1b94e; --muted: #aebdd4; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        background: radial-gradient(1200px 700px at 50% -10%, #123a6e 0%, #091d40 55%, #06142c 100%);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        padding: 32px 20px; -webkit-font-smoothing: antialiased;
+      }
+      .wrap { width: 100%; max-width: 920px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .brand img { height: 120px; width: auto; filter: drop-shadow(0 8px 24px rgba(0,0,0,.35)); margin-bottom: 8px; }
+      .brand h1 { font-size: 34px; font-weight: 800; letter-spacing: .02em; }
+      .brand h1 .gold { color: #e1b94e; }
+      .brand .sub { color: #aebdd4; font-size: 12px; letter-spacing: .32em; text-transform: uppercase; font-weight: 700; margin-top: 10px; }
+      .tagline { margin: 34px 0 10px; color: #dce6f5; font-size: 17px; font-weight: 500; }
+      .tagline strong { color: #fff; font-weight: 700; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 100%; margin-top: 24px; }
+      .card {
+        position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 14px;
+        padding: 28px; border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+        border: 1px solid rgba(197,155,39,.35); backdrop-filter: blur(6px); color: #fff; text-decoration: none;
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      }
+      .card:hover { transform: translateY(-4px); border-color: #c59b27; box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+      .card .kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; font-weight: 700; color: #e1b94e; }
+      .card .name { font-size: 26px; font-weight: 800; letter-spacing: .02em; }
+      .card .desc { font-size: 14px; line-height: 1.5; color: #aebdd4; flex: 1; }
+      .card .cta { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #091d40; background: linear-gradient(180deg, #e1b94e, #c59b27); padding: 12px 20px; border-radius: 10px; }
+      .empty { color: #aebdd4; font-size: 14px; }
+      .footer { margin-top: 40px; color: #7b8db0; font-size: 12px; letter-spacing: .04em; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="brand">
+        <img src="/logo.png" alt="FAME" />
+        <h1>FAME <span class="gold">Recrutement</span></h1>
+        <div class="sub">ENSAM Meknès — Forum des Métiers</div>
+      </div>
+      <p class="tagline">Choisissez votre campagne pour vous <strong>inscrire</strong> :</p>
+      <div class="grid">
+        <a class="card" href="https://fame-avl.gadzarts.xyz">
+          <span class="kicker">Campagne</span>
+          <span class="name">AVL</span>
+          <span class="desc">File d'attente et entretiens PFE — stand AVL.</span>
+          <span class="cta">S'inscrire chez AVL <span class="arrow">→</span></span>
+        </a>
+        <a class="card" href="https://fame-stellantis.gadzarts.xyz">
+          <span class="kicker">Campagne</span>
+          <span class="name">STELLANTIS</span>
+          <span class="desc">File d'attente et entretiens PFE — stand STELLANTIS.</span>
+          <span class="cta">S'inscrire chez STELLANTIS <span class="arrow">→</span></span>
+        </a>
+        <a class="card" href="https://fame-vinci.gadzarts.xyz">
+          <span class="kicker">Campagne</span>
+          <span class="name">VINCI</span>
+          <span class="desc">File d'attente et entretiens PFE — stand VINCI.</span>
+          <span class="cta">S'inscrire chez VINCI <span class="arrow">→</span></span>
+        </a>
+      </div>
+      <div class="footer">FAME · Gestion des files d'attente PFE · ENSAM Meknès</div>
+    </div>
+  </body>
+</html>

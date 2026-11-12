@@ -6,7 +6,7 @@ const express = require('express');
 let latestQr = '';
 
 const client = new Client({
-  authStrategy: new LocalAuth(),
+  authStrategy: new LocalAuth({ dataPath: process.env.SESSION_DIR || './.wwebjs_auth' }),
   puppeteer: {
     // Use the system Chrome (puppeteer's bundled browser is skipped at install).
     executablePath:
@@ -55,13 +55,16 @@ app.post('/send', async (req, res) => {
 
 app.get('/health', async (_req, res) => {
   let ready = false;
+  let alive = false;
   try {
     const state = await client.getState();
+    alive = true;
     ready = state === 'CONNECTED' && client.info !== undefined;
   } catch {
+    alive = false;
     ready = false;
   }
-  res.json({ ok: true, ready });
+  res.json({ ok: true, ready, alive });
 });
 
 // Render the current WhatsApp Web QR as a clean HTML page (scannable by phone).

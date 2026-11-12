@@ -35,6 +35,9 @@ async def candidate_ws(websocket: WebSocket) -> None:
         return
 
     candidate_id = int(claims["sub"])
+    # Authenticate in a short-lived session, then release the DB connection
+    # before entering the long-lived receive loop (holding it would exhaust the
+    # pool under load).
     async with SessionFactory() as session:
         candidate = await session.get(Candidate, candidate_id)
         if candidate is None:
@@ -43,15 +46,15 @@ async def candidate_ws(websocket: WebSocket) -> None:
         entry = await get_active_queue_entry(session, candidate_id)
         filiere = entry.filiere_code if entry else candidate.filiere_code
 
-        await manager.connect_candidate(websocket, candidate_id, filiere)
-        try:
-            while True:
-                # Client pings / no-op; we push updates server-side.
-                await websocket.receive_text()
-        except WebSocketDisconnect:
-            manager.disconnect_candidate(candidate_id, filiere)
-        except Exception:
-            manager.disconnect_candidate(candidate_id, filiere)
+    await manager.connect_candidate(websocket, candidate_id, filiere)
+    try:
+        while True:
+            # Client pings / no-op; we push updates server-side.
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect_candidate(candidate_id, filiere)
+    except Exception:
+        manager.disconnect_candidate(candidate_id, filiere)
 
 
 @router.websocket("/api/v1/ws/organizer")
@@ -61,6 +64,9 @@ async def organizer_ws(websocket: WebSocket) -> None:
         await websocket.close(code=4401)
         return
     token_hash = _hash_token(token)
+    # Authenticate in a short-lived session, then release the DB connection
+    # before the long-lived receive loop (same pool-exhaustion concern as the
+    # candidate socket).
     async with SessionFactory() as session:
         result = await session.execute(
             select(OrganizerSession).where(OrganizerSession.token_hash == token_hash)
@@ -70,11 +76,11 @@ async def organizer_ws(websocket: WebSocket) -> None:
             await websocket.close(code=4401)
             return
 
-        await manager.connect_organizer(websocket)
-        try:
-            while True:
-                await websocket.receive_text()
-        except WebSocketDisconnect:
-            manager.disconnect_organizer(websocket)
-        except Exception:
-            manager.disconnect_organizer(websocket)
+    await manager.connect_organizer(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect_organizer(websocket)
+    except Exception:
+        manager.disconnect_organizer(websocket)

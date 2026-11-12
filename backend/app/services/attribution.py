@@ -230,8 +230,8 @@ async def undo_attribution(
 
     last = await _last_action_event(session, candidate_id)
     _apply_status(entry, QueueStatus.WAITING, now)
-    # Undone candidates rejoin at the bottom of their filière queue.
-    entry.joined_at = now
+    # Undo restores the candidate's previous rank: joined_at is left untouched
+    # so the ordering keeps them where they were, not at the bottom.
     new_pos = await get_queue_position(session, entry)
 
     event = await _record(
@@ -261,6 +261,8 @@ async def return_to_queue(
         raise AttributionError(409, "Candidate is not attributed")
 
     _apply_status(entry, QueueStatus.WAITING, now)
+    # "Return to queue" explicitly sends the candidate to the bottom of the list.
+    entry.joined_at = now
     new_pos = await get_queue_position(session, entry)
 
     event = await _record(
@@ -383,9 +385,8 @@ async def undo_last(session: AsyncSession, organizer_id: int) -> AttributionOutc
 
     target = QueueStatus(event.previous_state) if event.previous_state else QueueStatus.WAITING
     _apply_status(entry, target, now)
-    if target == QueueStatus.WAITING:
-        # Undone candidates rejoin at the bottom of their filière queue.
-        entry.joined_at = now
+    # Undo restores the candidate's previous rank: joined_at is left untouched
+    # so the ordering keeps them where they were, not at the bottom.
     new_pos = await get_queue_position(session, entry) if target == QueueStatus.WAITING else None
 
     undo_event = await _record(

@@ -109,6 +109,11 @@ export const api = {
       method: 'POST',
       headers: { 'X-CSRF-Token': csrf },
     }),
+  returnToQueue: (candidateId: number, csrf: string) =>
+    request<AttributionResult>(`/api/v1/organizer/attributions/${candidateId}/return`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrf },
+    }),
   summoned: () => request<SummonedCandidate[]>('/api/v1/organizer/summoned'),
   arrive: (candidateId: number, csrf: string) =>
     request<AttributionResult>(`/api/v1/organizer/candidates/${candidateId}/arrive`, {

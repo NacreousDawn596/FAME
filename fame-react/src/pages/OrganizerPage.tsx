@@ -8,6 +8,10 @@ import type { Session } from '../auth'
 /** Time window (seconds) the organizer gives a summoned candidate to arrive. */
 const SUMMON_SECONDS = 300
 
+/** localStorage keys for the free-text regulator / room (persist unless changed). */
+const STORAGE_REGULATOR = 'fame:regulator'
+const STORAGE_ROOM = 'fame:room'
+
 interface Props {
   session: Session
   onLogout: () => void
@@ -18,10 +22,9 @@ interface Props {
 export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnauthorized }: Props) {
   const [queues, setQueues] = useState<FiliereQueue[]>([])
   const [stats, setStats] = useState<DashboardResponse['stats'] | null>(null)
-  const [regulators, setRegulators] = useState<string[]>([])
-  const [rooms, setRooms] = useState<string[]>([])
-  const [regulator, setRegulator] = useState<string>('')
-  const [room, setRoom] = useState<string>('')
+  const [companyName, setCompanyName] = useState<string>('')
+  const [regulator, setRegulator] = useState<string>(() => localStorage.getItem(STORAGE_REGULATOR) ?? '')
+  const [room, setRoom] = useState<string>(() => localStorage.getItem(STORAGE_ROOM) ?? '')
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<CandidateRow[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -42,9 +45,9 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
       setStats(dashboard.stats)
       setQueues(queueList)
       setSummoned(summonedList)
-      setRegulators(config.regulators ?? [])
-      setRooms(config.rooms ?? [])
-      // Default selection: first regulator + its paired room.
+      setCompanyName(config.company_name ?? '')
+      // Default selection: first regulator + its paired room, only if not
+      // already set (free text, persisted in localStorage).
       setRegulator((current) => current || (config.regulators?.[0] ?? ''))
       setRoom((current) => current || (config.rooms?.[0] ?? ''))
       const latest = dashboard.recent_operations[0]
@@ -62,12 +65,14 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
     return () => clearInterval(timer)
   }, [])
 
-  // When the regulator changes, auto-select its paired room (by index).
-  const selectRegulator = (name: string) => {
-    setRegulator(name)
-    const idx = regulators.indexOf(name)
-    if (idx >= 0 && rooms[idx]) setRoom(rooms[idx])
-  }
+  // Persist the free-text regulator / room across reloads.
+  useEffect(() => {
+    localStorage.setItem(STORAGE_REGULATOR, regulator)
+  }, [regulator])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_ROOM, room)
+  }, [room])
 
   useEffect(() => {
     load()
@@ -152,7 +157,7 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
 
   const cancelSummon = async (candidateId: number, name: string) => {
     try {
-      await api.undoAttribution(candidateId, session.csrf)
+      await api.returnToQueue(candidateId, session.csrf)
       setNotice(`${name} a été renvoyé(e) en fin de file.`)
       await load()
     } catch (err) {
@@ -172,7 +177,7 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
 
   return (
     <div className="organizer-page">
-      <AppHeader company="Safran Morocco" userName={session.name} userRole="Organisateur" onLogout={onLogout} onOpenPublic={onOpenPublic} />
+      <AppHeader company={companyName || 'FAME'} userName={session.name} userRole="Organisateur" onLogout={onLogout} onOpenPublic={onOpenPublic} />
       <main className="organizer-main">
         <section className="organizer-heading">
           <div>
@@ -196,15 +201,21 @@ export default function OrganizerPage({ session, onLogout, onOpenPublic, onUnaut
           <div className="assignment-row">
             <label>
               <span>Régulateur</span>
-              <select value={regulator} onChange={(e) => selectRegulator(e.target.value)}>
-                {regulators.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
+              <input
+                type="text"
+                value={regulator}
+                onChange={(e) => setRegulator(e.target.value)}
+                placeholder="Nom du régulateur"
+              />
             </label>
             <label>
               <span>Salle</span>
-              <select value={room} onChange={(e) => setRoom(e.target.value)}>
-                {rooms.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
+              <input
+                type="text"
+                value={room}
+                onChange={(e) => setRoom(e.target.value)}
+                placeholder="Nom de la salle"
+              />
             </label>
           </div>
         </section>

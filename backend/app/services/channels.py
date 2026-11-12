@@ -17,7 +17,7 @@ def _friendly_text(event_type: str) -> str:
         "IMMEDIATE": "vous êtes le prochain — présentez-vous",
         "URGENT": "votre tour approche",
         "APPROACHING": "votre tour approche",
-        "REVERSED": "vous êtes de nouveau en file d'attente (en fin de file)",
+        "REVERSED": "vous êtes de nouveau en file d'attente",
         "RETURNED": "votre statut a changé",
         "CANCELLED": "votre statut a changé",
     }.get(event_type, "votre statut a changé")

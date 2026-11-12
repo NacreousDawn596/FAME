@@ -34,7 +34,7 @@ def build_payload(
     elif event_type == NotificationEventType.APPROACHING:
         body = "Your turn is approaching."
     elif event_type == NotificationEventType.REVERSED:
-        body = "You're back in the waiting queue (at the end)."
+        body = "You're back in the waiting queue."
     elif event_type == NotificationEventType.RETURNED:
         body = "Your queue status has changed."
     elif event_type == NotificationEventType.CANCELLED:

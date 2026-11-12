@@ -59,7 +59,7 @@ async def seed_organizers(session: AsyncSession) -> list[str]:
         ).scalar_one_or_none()
         if existing is not None:
             continue
-        password = _random_password()
+        password = settings.organizer_initial_password or _random_password()
         username = email.split("@")[0]
         session.add(
             Organizer(username=username, email=email, password_hash=hash_password(password))

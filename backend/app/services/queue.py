@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -102,8 +104,20 @@ async def register_candidate(
             candidate_id=candidate.id,
             filiere_code=filiere_code,
             status=QueueStatus.WAITING,
+            # Explicit Python timestamp (single-threaded event loop) so the FIFO
+            # ordering is monotonic under concurrent registrations. Relying on
+            # the DB `now()` (transaction start time) is non-monotonic and made
+            # ranks jitter/conflict when ~200 people logged in at once.
+            joined_at=datetime.now(UTC),
         )
         session.add(entry)
+    elif entry.status == QueueStatus.WITHDRAWN:
+        # Rejoining after a voluntary withdrawal: re-add at the BOTTOM of the
+        # queue (fresh joined_at), not at their previous rank.
+        entry.status = QueueStatus.WAITING
+        entry.joined_at = datetime.now(UTC)
+        entry.version = (entry.version or 0) + 1
+        entry.filiere_code = filiere_code
     elif entry.filiere_code != filiere_code:
         entry.filiere_code = filiere_code
 

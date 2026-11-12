@@ -1,4 +1,30 @@
-name: fame
+# FAME — shared compose template.
+# A single template drives N isolated stacks. The deploy script supplies a
+# generated per-instance env file via `docker compose --env-file <file>` and a
+# distinct project name via `-p <name>` (project name isolates containers,
+# volumes and networks). Do not hardcode `name:` here.
+
+x-common-env: &common-env
+  ENVIRONMENT: ${ENVIRONMENT:-development}
+  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://fame:change-me-postgres@postgres:5432/fame}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  SESSION_SECRET: ${SESSION_SECRET:-}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
+  SCHOOLAPP_WORKER_URL: ${SCHOOLAPP_WORKER_URL:-}
+  SCHOOLAPP_PUBLIC_KEY: ${SCHOOLAPP_PUBLIC_KEY:-}
+  SCHOOLAPP_ISSUER: ${SCHOOLAPP_ISSUER:-fame-schoolapp}
+  SCHOOLAPP_AUDIENCE: ${SCHOOLAPP_AUDIENCE:-fame-api}
+  ORGANIZER_INITIAL_EMAILS: ${ORGANIZER_INITIAL_EMAILS:-}
+  ORGANIZER_INITIAL_PASSWORD: ${ORGANIZER_INITIAL_PASSWORD:-}
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:fame@gadzarts.xyz}
+  NOTIFICATION_EMAIL: ${NOTIFICATION_EMAIL:-fame@gadzarts.xyz}
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5483}
+  API_URL: ${API_URL:-http://localhost:5483}
+  DEFAULT_COMPANY_NAME: ${DEFAULT_COMPANY_NAME:-FAME Recruitment}
+  REGULATORS: ${REGULATORS:-}
+  ROOMS: ${ROOMS:-}
 
 services:
   postgres:
@@ -43,10 +69,8 @@ services:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
     restart: unless-stopped
-    env_file: .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://fame:change-me-postgres@postgres:5432/fame}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      <<: *common-env
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,10 +93,8 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     restart: unless-stopped
     command: ["arq", "app.workers.notifications.WorkerSettings"]
-    env_file: .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://fame:change-me-postgres@postgres:5432/fame}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      <<: *common-env
       WHATSAPP_BRIDGE_URL: ${WHATSAPP_BRIDGE_URL:-http://host.docker.internal:3000}
     extra_hosts:
       - "host.docker.internal:host-gateway"

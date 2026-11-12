@@ -60,7 +60,7 @@ export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`logo ${compact ? 'logo-compact' : ''}`}>
-      <div className="logo-mark"><span>F</span><i /></div>
+      <img className="logo-img" src="/logo.png" alt="FAME" />
       {!compact && <div className="logo-copy"><strong>FAME</strong><small>ENSAM MEKNÈS</small></div>}
     </div>
   )

@@ -3,6 +3,14 @@
 .env.local
 .env.*.local
 
+# Multi-instance deployment (secrets: tokens, generated passwords)
+instances.csv
+.run/
+
+exports/
+
+sessions/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -54,3 +62,5 @@ start.sh
 # WhatsApp bridge session (never commit)
 .wwebjs_auth/
 .wwebjs_cache/
+
+instances.csv

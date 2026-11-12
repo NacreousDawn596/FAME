@@ -37,11 +37,17 @@ export default function StudentPage({ session, onLogout, onUnauthorized }: Props
   const [notifError, setNotifError] = useState('')
   const [confirmLeave, setConfirmLeave] = useState(false)
 
-  const load = async () => {
+  const load = async (retries = 3) => {
     try {
       setMe(await api.candidateMe())
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) onUnauthorized()
+      else if (retries > 0) {
+        // Transient failure under load (e.g. a pooled connection timeout) —
+        // retry with a short backoff instead of leaving the ticket blank.
+        setTimeout(() => load(retries - 1), 1000)
+        return
+      }
     } finally {
       setLoading(false)
     }

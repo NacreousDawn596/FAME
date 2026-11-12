@@ -46,13 +46,11 @@ button { cursor: pointer; }
 
 /* Brand and global shell */
 .logo { display: flex; align-items: center; gap: 10px; color: white; }
-.logo-mark { width: 39px; height: 39px; position: relative; border: 1px solid rgba(197,155,39,.7); display: grid; place-items: center; transform: rotate(45deg); border-radius: 4px; }
-.logo-mark span { transform: rotate(-45deg); font-size: 19px; font-weight: 800; color: var(--gold); }
-.logo-mark i { position: absolute; width: 5px; height: 5px; background: var(--gold); right: 2px; top: 2px; border-radius: 50%; }
+.logo-img { height: 40px; width: auto; object-fit: contain; display: block; }
 .logo-copy { display: flex; flex-direction: column; }
 .logo-copy strong { font-size: 19px; line-height: 1; letter-spacing: .08em; }
 .logo-copy small { color: #aebdd4; font-size: 7px; margin-top: 4px; letter-spacing: .15em; font-weight: 700; }
-.logo-compact .logo-mark { width: 34px; height: 34px; }
+.logo-compact .logo-img { height: 32px; }
 .app-header { height: 72px; background: var(--white); border-bottom: 1px solid var(--border); padding: 0 clamp(20px, 4vw, 64px); display: flex; align-items: center; justify-content: space-between; }
 .app-header .logo { color: var(--navy); }
 .app-header .logo-copy small { color: var(--muted); }
@@ -392,7 +390,7 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
   .app { padding-top: 54px; }
   .prototype-nav { height: 54px; padding: 0 10px; }
   .nav-brand .logo-copy, .nav-brand > span { display: none; }
-  .nav-brand .logo-mark { width: 29px; height: 29px; }
+  .nav-brand .logo-img { height: 29px; }
   .screen-tabs button { padding: 0 9px; }
   .screen-tabs button span { display: none; }
   .screen-tabs button b { display: block; font-size: 9px; }
@@ -665,7 +663,7 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
   .student-app-header .campaign-pill,
   .student-app-header .user-chip,
   .student-app-header .logout span { display: none; }
-  .student-app-header .logo-mark { width: 32px; height: 32px; }
+  .student-app-header .logo-img { height: 32px; }
   .student-app-header .logo-copy strong { font-size: 17px; }
   .student-app-header .logo-copy small { font-size: 6px; }
   .student-app-header .user-area { gap: 8px; }
@@ -811,7 +809,8 @@ input:focus, select:focus { border-color: var(--slate-blue); box-shadow: 0 0 0 3
 .assignment-panel { margin-bottom: 18px; }
 .assignment-row { display: flex; gap: 18px; flex-wrap: wrap; }
 .assignment-row label { display: flex; flex-direction: column; gap: 6px; font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; flex: 1; min-width: 180px; }
-.assignment-row select { height: 38px; border: 1px solid var(--border); border-radius: 9px; background: white; padding: 0 12px; color: var(--navy); font-size: 13px; text-transform: none; letter-spacing: normal; }
+.assignment-row input { height: 38px; border: 1px solid var(--border); border-radius: 9px; background: white; padding: 0 12px; color: var(--navy); font-size: 13px; text-transform: none; letter-spacing: normal; font-family: inherit; }
+.assignment-row input::placeholder { color: #a7b4c6; }
 
 /* --- Summoned candidates panel --- */
 .summoned-panel { margin-bottom: 18px; border-color: #fde68a; background: #fffdf5; }
