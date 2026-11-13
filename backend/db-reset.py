@@ -19,7 +19,7 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.database import Base, SessionFactory, engine
-from app.models import Company, Filiere, Organizer
+from app.models import Organizer
 from app.security.passwords import hash_password
 from app.seed.filieres import FILIERES
 from app.seed.seed import seed_company, seed_filieres
