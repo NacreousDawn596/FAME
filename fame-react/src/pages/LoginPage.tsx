@@ -74,7 +74,7 @@ export default function LoginPage({ onSuccess }: { onSuccess: (session: Session)
                     autoComplete="username"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="prenom.nom@edu.umi.ac.ma"
+                    placeholder="schoolapp email"
                     required
                   />
                 </div>
